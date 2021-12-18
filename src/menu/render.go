@@ -6,17 +6,24 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func renderMenu() {
+func (m *menuPagesType) renderMenu() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 
-	y := menuPos.y
-	for idx, opt := range menuOps {
-		if curOpt == idx {
-			tbu.RenderText(tbu.Text{X: menuPos.x, Y: y, Text: opt, Bg: termbox.ColorYellow, Fg: termbox.ColorBlack, InlinePadding: 3})
-		} else {
-			tbu.RenderText(tbu.Text{X: menuPos.x, Y: y, Text: opt})
+	curMenu := m.menus[m.curIdx]
+
+	y := m.displayPos.y
+
+	var fg, bg termbox.Attribute
+
+	for oidx, op := range curMenu.opts {
+		fg, bg = termbox.ColorDefault, termbox.ColorDefault
+		if curMenu.curIdx == oidx {
+			bg = termbox.ColorYellow
+			fg = termbox.ColorBlack
 		}
-		y++
+		tbu.RenderText(tbu.Text{Text: op.label, X: m.displayPos.x, Y: y, Fg: fg, Bg: bg, InlinePadding: 3})
+		y += 2
 	}
+
 	termbox.Flush()
 }

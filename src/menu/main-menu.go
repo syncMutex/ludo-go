@@ -4,35 +4,21 @@ type pos struct {
 	x, y int
 }
 
+type menuPagesType struct {
+	curIdx     int
+	menus      []menu
+	displayPos pos
+}
+
 var (
-	menuPos = pos{2, 3}
-	menuOps = []string{
-		"Start",
-		"Quit",
+	menuPages = menuPagesType{
+		displayPos: pos{5, 5},
+		curIdx:     0,
+		menus:      []menu{mainMenu},
 	}
-	curOpt int
 )
 
-func handleMenuNav(mag int) {
-	curOpt += mag
-	optCount := len(menuOps) - 1
-	if curOpt > optCount {
-		curOpt = 0
-	}
-	if curOpt < 0 {
-		curOpt = optCount
-	}
-}
-
-func handleOptSelect() (quit bool) {
-	switch curOpt {
-	case 1:
-		return true
-	}
-	return false
-}
-
 func StartMainMenu() {
-	renderMenu()
-	listenMenuKeyboard()
+	menuPages.renderMenu()
+	menuPages.keyboardLoop()
 }

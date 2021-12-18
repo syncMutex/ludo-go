@@ -6,7 +6,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func listenMenuKeyboard() {
+func (m *menuPagesType) keyboardLoop() {
 	kb := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 	go keyboard.ListenToKeyboard(kb)
 	for {
@@ -17,17 +17,17 @@ func listenMenuKeyboard() {
 		case 'S':
 			fallthrough
 		case termbox.KeyArrowDown:
-			handleMenuNav(1)
+			m.menus[m.curIdx].handleOptNav(1)
 		case 'w':
 			fallthrough
 		case 'W':
 			fallthrough
 		case termbox.KeyArrowUp:
-			handleMenuNav(-1)
+			m.menus[m.curIdx].handleOptNav(-1)
 		case termbox.KeySpace:
 			fallthrough
 		case termbox.KeyEnter:
-			if quit := handleOptSelect(); quit {
+			if quit := m.handleOptSelect(); quit {
 				kb.StopKeyboardListen()
 				return
 			}
@@ -35,6 +35,6 @@ func listenMenuKeyboard() {
 			kb.StopKeyboardListen()
 			return
 		}
-		renderMenu()
+		m.renderMenu()
 	}
 }
