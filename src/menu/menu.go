@@ -24,9 +24,29 @@ func (m *menu) handleOptNav(mag int) {
 	}
 }
 
+func (m *menu) handleSubOptNav(mag int) {
+	curOpt := &m.opts[m.curIdx]
+
+	if curOpt.subOpts == nil {
+		return
+	}
+	maxOptIdx := len(curOpt.subOpts) - 1
+
+	curOpt.curIdx += mag
+
+	if curOpt.curIdx < 0 {
+		curOpt.curIdx = maxOptIdx
+	} else if curOpt.curIdx == maxOptIdx+1 {
+		curOpt.curIdx = 0
+	}
+}
+
 func (m *menuPagesType) handleOptSelect() (bool, callback) {
 	curMenu := m.menus[m.curIdx]
-	return curMenu.opts[curMenu.curIdx].onSelect(m)
+	if curMenu.opts[curMenu.curIdx].onSelect != nil {
+		return curMenu.opts[curMenu.curIdx].onSelect(m)
+	}
+	return false, nil
 }
 
 func (m *menuPagesType) changeMenuPage(pageIdx int) {

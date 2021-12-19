@@ -26,6 +26,18 @@ func (m *menuPagesType) keyboardLoop() callback {
 			fallthrough
 		case termbox.KeyArrowUp:
 			m.menus[m.curIdx].handleOptNav(-1)
+		case 'a':
+			fallthrough
+		case 'A':
+			fallthrough
+		case termbox.KeyArrowLeft:
+			m.menus[m.curIdx].handleSubOptNav(-1)
+		case 'd':
+			fallthrough
+		case 'D':
+			fallthrough
+		case termbox.KeyArrowRight:
+			m.menus[m.curIdx].handleSubOptNav(1)
 		case termbox.KeySpace:
 			fallthrough
 		case termbox.KeyEnter:
