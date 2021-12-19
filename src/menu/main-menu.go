@@ -10,15 +10,14 @@ type menuPagesType struct {
 	displayPos pos
 }
 
-var (
-	menuPages = menuPagesType{
+func InitMenu() {
+	menuPages := menuPagesType{
 		displayPos: pos{5, 5},
 		curIdx:     0,
-		menus:      []menu{mainMenu},
+		menus:      []menu{mainMenu, startMenu},
 	}
-)
-
-func StartMainMenu() {
 	menuPages.renderMenu()
-	menuPages.keyboardLoop()
+	if callback := menuPages.keyboardLoop(); callback != nil {
+		callback()
+	}
 }

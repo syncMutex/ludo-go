@@ -2,7 +2,7 @@ package menu
 
 type opt struct {
 	label    string
-	onSelect func() bool
+	onSelect func(*menuPagesType) (bool, callback)
 	curIdx   int
 	subOpts  []string
 }
@@ -24,7 +24,11 @@ func (m *menu) handleOptNav(mag int) {
 	}
 }
 
-func (m *menuPagesType) handleOptSelect() bool {
+func (m *menuPagesType) handleOptSelect() (bool, callback) {
 	curMenu := m.menus[m.curIdx]
-	return curMenu.opts[curMenu.curIdx].onSelect()
+	return curMenu.opts[curMenu.curIdx].onSelect(m)
+}
+
+func (m *menuPagesType) changeMenuPage(pageIdx int) {
+	m.curIdx = pageIdx
 }

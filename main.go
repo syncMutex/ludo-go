@@ -19,5 +19,5 @@ func uninitTermboxStuff() {
 func main() {
 	defer uninitTermboxStuff()
 	initTermboxStuff()
-	menu.StartMainMenu()
+	menu.InitMenu()
 }
