@@ -6,7 +6,7 @@ type pos struct {
 
 type menuPagesType struct {
 	curIdx     int
-	menus      []menu
+	menus      []*menu
 	displayPos pos
 }
 
@@ -14,7 +14,7 @@ func InitMenu() {
 	menuPages := menuPagesType{
 		displayPos: pos{5, 5},
 		curIdx:     0,
-		menus:      []menu{mainMenu, startMenu, offlineMenu},
+		menus:      []*menu{&mainMenu, &startMenu, &offlineMenu, &offlinePlayersConfig},
 	}
 	menuPages.renderMenu()
 	if callback := menuPages.keyboardLoop(); callback != nil {

@@ -1,10 +1,11 @@
 package menu
 
 type opt struct {
-	label    string
-	onSelect func(*menuPagesType) (bool, callback)
-	curIdx   int
-	subOpts  []string
+	label       string
+	onSelect    func(*menuPagesType) (bool, callback)
+	onSubOptNav func()
+	curIdx      int
+	subOpts     []interface{}
 }
 
 type menu struct {
@@ -12,16 +13,18 @@ type menu struct {
 	opts   []opt
 }
 
-func (m *menu) handleOptNav(mag int) {
+func (m *menu) validateOptBounds() {
 	maxOptIdx := len(m.opts) - 1
-
-	m.curIdx += mag
-
 	if m.curIdx < 0 {
 		m.curIdx = maxOptIdx
 	} else if m.curIdx == maxOptIdx+1 {
 		m.curIdx = 0
 	}
+}
+
+func (m *menu) handleOptNav(mag int) {
+	m.curIdx += mag
+	m.validateOptBounds()
 }
 
 func (m *menu) handleSubOptNav(mag int) {
@@ -39,6 +42,10 @@ func (m *menu) handleSubOptNav(mag int) {
 	} else if curOpt.curIdx == maxOptIdx+1 {
 		curOpt.curIdx = 0
 	}
+
+	if curOpt.onSubOptNav != nil {
+		curOpt.onSubOptNav()
+	}
 }
 
 func (m *menuPagesType) handleOptSelect() (bool, callback) {
@@ -51,4 +58,5 @@ func (m *menuPagesType) handleOptSelect() (bool, callback) {
 
 func (m *menuPagesType) changeMenuPage(pageIdx int) {
 	m.curIdx = pageIdx
+	m.menus[m.curIdx].curIdx = 0
 }
