@@ -1,11 +1,11 @@
 package menu
 
 type opt struct {
-	label       string
+	label       interface{}
 	onSelect    func(*menuPagesType) (bool, callback)
 	onSubOptNav func(*menu, int)
 	curIdx      int
-	subOpts     []interface{}
+	subOpts     []string
 }
 
 type menu struct {

@@ -16,22 +16,20 @@ func renderSubOpts(op opt, x, y, oidx, menuIdx int) {
 	if menuIdx == oidx {
 		bg, fg = termbox.ColorYellow, termbox.ColorBlack
 	}
-	tbu.RenderText(tbu.Text{Text: op.label, X: x, Y: y, Fg: fg, Bg: bg, InlinePadding: paddingMag})
 
-	x = x + len(op.label) + paddingMag + 5
-
-	switch t := op.subOpts[op.curIdx].(type) {
+	switch l := op.label.(type) {
 	case string:
-		if menuIdx == oidx {
-			fg, bg = termbox.ColorGreen, termbox.ColorDefault
-		} else {
-			fg, bg = termbox.ColorDefault, termbox.ColorDefault
-		}
-		tbu.RenderText(tbu.Text{Text: t, X: x, Y: y, Fg: fg, Bg: bg})
+		x += len(l)
+		tbu.RenderText(tbu.Text{Text: l, X: x, Y: y, Fg: fg, Bg: bg, InlinePadding: paddingMag})
 	case termbox.Attribute:
-		tbu.RenderText(tbu.Text{Text: "", X: x, Y: y, Fg: fg, Bg: t, InlinePadding: 1})
+		tbu.RenderText(tbu.Text{Text: "", X: x, Y: y, Fg: fg, Bg: l, InlinePadding: 1})
 	}
-
+	if menuIdx == oidx {
+		fg, bg = termbox.ColorGreen, termbox.ColorDefault
+	} else {
+		fg, bg = termbox.ColorDefault, termbox.ColorDefault
+	}
+	tbu.RenderText(tbu.Text{Text: op.subOpts[op.curIdx], X: x + 4, Y: y, Fg: fg, Bg: bg})
 }
 
 func (m *menuPagesType) renderMenu() {
@@ -52,7 +50,12 @@ func (m *menuPagesType) renderMenu() {
 			if curMenu.curIdx == oidx {
 				bg, fg = termbox.ColorYellow, termbox.ColorBlack
 			}
-			tbu.RenderText(tbu.Text{Text: op.label, X: m.displayPos.x, Y: y, Fg: fg, Bg: bg, InlinePadding: paddingMag})
+			switch l := op.label.(type) {
+			case string:
+				tbu.RenderText(tbu.Text{Text: l, X: m.displayPos.x, Y: y, Fg: fg, Bg: bg, InlinePadding: paddingMag})
+			case termbox.Attribute:
+				tbu.RenderText(tbu.Text{Text: "", X: m.displayPos.x, Y: y, Fg: fg, Bg: l, InlinePadding: 1})
+			}
 		}
 		y += 2
 	}

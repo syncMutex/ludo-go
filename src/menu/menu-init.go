@@ -14,7 +14,7 @@ func InitMenu() {
 	menuPages := menuPagesType{
 		displayPos: pos{5, 5},
 		curIdx:     0,
-		menus:      []*menu{&mainMenu, &startMenu, &offlineMenu, &offlinePlayersConfig},
+		menus:      []*menu{&mainMenu, &startMenu, &offlineMenu, &offlineMenu},
 	}
 	menuPages.renderMenu()
 	if callback := menuPages.keyboardLoop(); callback != nil {
