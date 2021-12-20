@@ -4,7 +4,7 @@ import "github.com/nsf/termbox-go"
 
 type PlayerData struct {
 	Name  string
-	IsBot bool
+	Type  string
 	Color termbox.Attribute
 }
 

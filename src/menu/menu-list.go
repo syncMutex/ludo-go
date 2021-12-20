@@ -1,6 +1,10 @@
 package menu
 
-import "github.com/nsf/termbox-go"
+import (
+	"ludo/src/game"
+
+	"github.com/nsf/termbox-go"
+)
 
 var (
 	mainMenu = menu{
@@ -69,7 +73,16 @@ var (
 			{
 				label: "Done",
 				onSelect: func(mpt *menuPagesType) (bool, callback) {
-					return false, nil
+					players := []game.PlayerData{}
+					curMenuOpts := mpt.menus[mpt.curIdx].opts
+					curMenuOpts = curMenuOpts[:len(curMenuOpts)-2]
+
+					for _, opt := range curMenuOpts {
+						players = append(players, game.PlayerData{Name: "", Color: opt.label.(termbox.Attribute), Type: opt.subOpts[opt.curIdx]})
+					}
+					return true, func() {
+
+					}
 				},
 			},
 			{
