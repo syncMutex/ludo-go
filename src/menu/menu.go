@@ -3,7 +3,7 @@ package menu
 type opt struct {
 	label       string
 	onSelect    func(*menuPagesType) (bool, callback)
-	onSubOptNav func()
+	onSubOptNav func(*menu, int)
 	curIdx      int
 	subOpts     []interface{}
 }
@@ -29,22 +29,21 @@ func (m *menu) handleOptNav(mag int) {
 
 func (m *menu) handleSubOptNav(mag int) {
 	curOpt := &m.opts[m.curIdx]
-
 	if curOpt.subOpts == nil {
 		return
 	}
-	maxOptIdx := len(curOpt.subOpts) - 1
-
-	curOpt.curIdx += mag
-
-	if curOpt.curIdx < 0 {
-		curOpt.curIdx = maxOptIdx
-	} else if curOpt.curIdx == maxOptIdx+1 {
-		curOpt.curIdx = 0
-	}
-
 	if curOpt.onSubOptNav != nil {
-		curOpt.onSubOptNav()
+		curOpt.onSubOptNav(m, mag)
+	} else {
+		maxOptIdx := len(curOpt.subOpts) - 1
+
+		curOpt.curIdx += mag
+
+		if curOpt.curIdx < 0 {
+			curOpt.curIdx = maxOptIdx
+		} else if curOpt.curIdx == maxOptIdx+1 {
+			curOpt.curIdx = 0
+		}
 	}
 }
 

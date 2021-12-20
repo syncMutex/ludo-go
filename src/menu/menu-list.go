@@ -9,9 +9,9 @@ import (
 var (
 	offlinePlayersConfigElements = []opt{}
 
-	supportingColors = []termbox.Attribute{termbox.ColorBlue, termbox.ColorRed, termbox.ColorGreen, termbox.ColorYellow}
-	colors           []termbox.Attribute
-	maxBotCount      = 0
+	supportingColors = []interface{}{termbox.ColorBlue, termbox.ColorRed, termbox.ColorGreen, termbox.ColorYellow}
+	colors           []interface{}
+	colorsStatus     = map[int]bool{}
 
 	mainMenu = menu{
 		opts: []opt{
@@ -93,17 +93,54 @@ var (
 )
 
 func setAvailableColors(count int) {
-	maxBotCount = count - 1
-	colors = supportingColors[0:count]
+	colors = append([]interface{}{"bot"}, supportingColors...)
+	for i := range colorsStatus {
+		colorsStatus[i] = false
+	}
+}
+
+func customSubOpt(m *menu, mag int) {
+	curOpt := &m.opts[m.curIdx]
+
+	if curOpt.curIdx != 0 {
+		colorsStatus[curOpt.curIdx] = false
+	}
+
+	curOpt.curIdx += mag
+	for colorsStatus[curOpt.curIdx] {
+		curOpt.curIdx += mag
+	}
+
+	if curOpt.curIdx < 0 {
+		curOpt.curIdx = len(colors) - 1
+	} else if curOpt.curIdx >= len(curOpt.subOpts) {
+		curOpt.curIdx = 0
+	}
+
+	if curOpt.curIdx != 0 {
+		colorsStatus[curOpt.curIdx] = true
+	}
 }
 
 func getPlayersOptionsElements(count int) []opt {
 	optsElements := []opt{}
+
 	for i := 1; i <= count; i++ {
-		optsElements = append(optsElements, opt{
-			label:   "Player " + strconv.Itoa(i),
-			subOpts: []interface{}{"bot"},
-		})
+		if i == 1 {
+			optsElements = append(optsElements, opt{
+				label:       "Player " + strconv.Itoa(i),
+				curIdx:      1,
+				subOpts:     colors,
+				onSubOptNav: customSubOpt,
+			})
+			colorsStatus[1] = true
+		} else {
+			optsElements = append(optsElements, opt{
+				label:       "Player " + strconv.Itoa(i),
+				subOpts:     colors,
+				onSubOptNav: customSubOpt,
+			})
+		}
 	}
 
 	return optsElements
