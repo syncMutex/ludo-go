@@ -82,34 +82,41 @@ func getColorMap(boxes []box) boardStruct {
 }
 
 func createBoardData() boardStruct {
+	bx, by := 1, 1
+
+	borderBox := []box{
+		{
+			pos:         pos{bx, by},
+			borderColor: termbox.ColorWhite,
+			l:           10, b: 25,
+		},
+	}
+
 	homeBoxes := []box{
 		{
-			pos:         pos{2, 1},
+			pos:         pos{bx + 2, by + 1},
 			borderColor: termbox.ColorBlue,
 			l:           2, b: 7,
 		},
 		{
-			pos:         pos{13, 1},
+			pos:         pos{bx + 16, by + 1},
 			borderColor: termbox.ColorGreen,
 			l:           2, b: 7,
 		},
 		{
-			pos:         pos{13, 6},
+			pos:         pos{bx + 16, by + 7},
 			borderColor: termbox.ColorRed,
 			l:           2, b: 7,
 		},
 		{
-			pos:         pos{2, 6},
+			pos:         pos{bx + 2, by + 7},
 			borderColor: termbox.ColorYellow,
 			l:           2, b: 7,
 		},
-	}
-
-	borderBox := []box{
 		{
-			pos:         pos{0, 0},
-			borderColor: termbox.ColorWhite,
-			l:           9, b: 22,
+			pos:         pos{bx + 10, by + 4},
+			borderColor: termbox.ColorDefault,
+			l:           2, b: 5,
 		},
 	}
 

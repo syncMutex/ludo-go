@@ -23,5 +23,5 @@ func StartGameOffline(players []PlayerData) {
 	termbox.Flush()
 	ar := arena{board: ludoBoard{}}
 	ar.board.setupBoard()
-	time.Sleep(time.Second * 20)
+	time.Sleep(time.Second * 5)
 }
