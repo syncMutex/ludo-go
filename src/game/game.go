@@ -1,6 +1,10 @@
 package game
 
-import "github.com/nsf/termbox-go"
+import (
+	"time"
+
+	"github.com/nsf/termbox-go"
+)
 
 type PlayerData struct {
 	Name  string
@@ -8,6 +12,16 @@ type PlayerData struct {
 	Color termbox.Attribute
 }
 
-func StartGame() {
+type arena struct {
+	players []PlayerData
+	board   ludoBoard
+	curTurn int
+}
 
+func StartGameOffline(players []PlayerData) {
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	termbox.Flush()
+	ar := arena{board: ludoBoard{}}
+	ar.board.setupBoard()
+	time.Sleep(time.Second * 20)
 }
