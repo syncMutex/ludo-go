@@ -23,7 +23,6 @@ func handleKeyboard(k keyboard.KeyboardEvent) bool {
 	case termbox.KeyEsc:
 		return true
 	}
-
 	return false
 }
 
@@ -40,6 +39,7 @@ mainloop:
 				kChan.Stop()
 				break mainloop
 			}
+			kChan.Done()
 		default:
 			a.board.renderBoard()
 		}
