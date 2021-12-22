@@ -1,12 +1,14 @@
 package game
 
-import "github.com/nsf/termbox-go"
+import (
+	"github.com/nsf/termbox-go"
+)
 
 type pos struct{ x, y int }
 
 type ludoBoard struct {
 	pawnsLocations []pawnData
-	boardData      boardStruct
+	boardData      colorMap
 }
 
 type pawnData struct {
@@ -21,13 +23,18 @@ type cell struct {
 	fg   termbox.Attribute
 }
 
-type boardStruct map[termbox.Attribute][]cell
+type colorMap map[termbox.Attribute][]cell
 
 type box struct {
 	pos         pos
 	borderColor termbox.Attribute
 	fillColor   termbox.Attribute
 	l, b        int
+}
+
+type point struct {
+	pos   pos
+	color termbox.Attribute
 }
 
 func (board *ludoBoard) renderBoard() {
@@ -40,96 +47,128 @@ func (board *ludoBoard) renderBoard() {
 	termbox.Flush()
 }
 
-func getColorMap(boxes []box) boardStruct {
-	colorMap := boardStruct{}
-	for _, b := range boxes {
-		// edges start
-		colorMap[b.borderColor] = append(colorMap[b.borderColor], cell{
-			x: b.pos.x, y: b.pos.y, ch: '┌', fg: b.borderColor, bg: b.fillColor,
-		})
-		colorMap[b.borderColor] = append(colorMap[b.borderColor], cell{
-			x: b.pos.x + b.b, y: b.pos.y, ch: '┐', fg: b.borderColor, bg: b.fillColor,
-		})
-		colorMap[b.borderColor] = append(colorMap[b.borderColor], cell{
-			x: b.pos.x, y: b.pos.y + b.l + 1, ch: '└', fg: b.borderColor, bg: b.fillColor,
-		})
-		colorMap[b.borderColor] = append(colorMap[b.borderColor], cell{
-			x: b.pos.x + b.b, y: b.pos.y + b.l + 1, ch: '┘', fg: b.borderColor, bg: b.fillColor,
-		})
-		// edges end
+func boxColorMap(b box) colorMap {
+	cm := colorMap{}
+	// edges start
+	cm[b.borderColor] = append(cm[b.borderColor], cell{
+		x: b.pos.x, y: b.pos.y, ch: '┌', fg: b.borderColor, bg: b.fillColor,
+	})
+	cm[b.borderColor] = append(cm[b.borderColor], cell{
+		x: b.pos.x + b.b, y: b.pos.y, ch: '┐', fg: b.borderColor, bg: b.fillColor,
+	})
+	cm[b.borderColor] = append(cm[b.borderColor], cell{
+		x: b.pos.x, y: b.pos.y + b.l + 1, ch: '└', fg: b.borderColor, bg: b.fillColor,
+	})
+	cm[b.borderColor] = append(cm[b.borderColor], cell{
+		x: b.pos.x + b.b, y: b.pos.y + b.l + 1, ch: '┘', fg: b.borderColor, bg: b.fillColor,
+	})
+	// edges end
 
-		// along x-axis
-		for i, x := 0, b.pos.x+1; i < b.b-1; i, x = i+1, x+1 {
-			colorMap[b.borderColor] = append(colorMap[b.borderColor], cell{
-				x: x, y: b.pos.y + b.l + 1, ch: '─', fg: b.borderColor, bg: b.fillColor,
-			})
-			colorMap[b.borderColor] = append(colorMap[b.borderColor], cell{
-				x: x, y: b.pos.y, ch: '─', fg: b.borderColor, bg: b.fillColor,
-			})
-		}
-
-		// along y-axiss
-		for i, y := 0, b.pos.y+1; i < b.l; i, y = i+1, y+1 {
-			colorMap[b.borderColor] = append(colorMap[b.borderColor], cell{
-				x: b.pos.x + b.b, y: y, ch: '│', fg: b.borderColor, bg: b.fillColor,
-			})
-			colorMap[b.borderColor] = append(colorMap[b.borderColor], cell{
-				x: b.pos.x, y: y, ch: '│', fg: b.borderColor, bg: b.fillColor,
-			})
-		}
+	// along x-axis
+	for i, x := 0, b.pos.x+1; i < b.b-1; i, x = i+1, x+1 {
+		cm[b.borderColor] = append(cm[b.borderColor], cell{
+			x: x, y: b.pos.y + b.l + 1, ch: '─', fg: b.borderColor, bg: b.fillColor,
+		})
+		cm[b.borderColor] = append(cm[b.borderColor], cell{
+			x: x, y: b.pos.y, ch: '─', fg: b.borderColor, bg: b.fillColor,
+		})
 	}
 
-	return colorMap
+	// along y-axiss
+	for i, y := 0, b.pos.y+1; i < b.l; i, y = i+1, y+1 {
+		cm[b.borderColor] = append(cm[b.borderColor], cell{
+			x: b.pos.x + b.b, y: y, ch: '│', fg: b.borderColor, bg: b.fillColor,
+		})
+		cm[b.borderColor] = append(cm[b.borderColor], cell{
+			x: b.pos.x, y: y, ch: '│', fg: b.borderColor, bg: b.fillColor,
+		})
+	}
+
+	return cm
 }
 
-func createBoardData() boardStruct {
+func pointColorMap(pt point) colorMap {
+	cm := colorMap{}
+	cm[pt.color] = append(cm[pt.color], cell{x: pt.pos.x, y: pt.pos.y, ch: ' ', fg: termbox.ColorDefault, bg: pt.color})
+	cm[pt.color] = append(cm[pt.color], cell{x: pt.pos.x + 1, y: pt.pos.y, ch: ' ', fg: termbox.ColorDefault, bg: pt.color})
+	return cm
+}
+
+func getColorMap(elements []interface{}) colorMap {
+	cm := colorMap{}
+	for _, ele := range elements {
+		switch e := ele.(type) {
+		case box:
+			cm.updateColorMap(boxColorMap(e))
+		case point:
+			cm.updateColorMap(pointColorMap(e))
+		}
+	}
+
+	return cm
+}
+
+func (cm colorMap) updateColorMap(update colorMap) {
+	for col := range update {
+		cm[col] = append(cm[col], update[col]...)
+	}
+}
+
+func createBoardData() colorMap {
 	bx, by := 1, 1
 
-	borderBox := []box{
-		{
-			pos:         pos{bx, by},
-			borderColor: termbox.ColorWhite,
-			l:           10, b: 25,
-		},
+	borderBox := box{
+		pos:         pos{bx, by},
+		borderColor: termbox.ColorWhite,
+		l:           11, b: 26,
 	}
 
-	homeBoxes := []box{
-		{
-			pos:         pos{bx + 2, by + 1},
-			borderColor: termbox.ColorBlue,
-			l:           2, b: 7,
-		},
-		{
-			pos:         pos{bx + 16, by + 1},
-			borderColor: termbox.ColorGreen,
-			l:           2, b: 7,
-		},
-		{
-			pos:         pos{bx + 16, by + 7},
-			borderColor: termbox.ColorRed,
-			l:           2, b: 7,
-		},
-		{
-			pos:         pos{bx + 2, by + 7},
-			borderColor: termbox.ColorYellow,
-			l:           2, b: 7,
-		},
-		{
-			pos:         pos{bx + 10, by + 4},
-			borderColor: termbox.ColorDefault,
-			l:           2, b: 6,
-		},
+	boxLen, boxWid := 3, 8
+
+	homeBoxes := []interface{}{
+		box{pos: pos{bx + 2, by + 1}, borderColor: termbox.ColorBlue, l: boxLen, b: boxWid},
+		box{pos: pos{bx + 16, by + 1}, borderColor: termbox.ColorGreen, l: boxLen, b: boxWid},
+		box{pos: pos{bx + 16, by + 7}, borderColor: termbox.ColorRed, l: boxLen, b: boxWid},
+		box{pos: pos{bx + 2, by + 7}, borderColor: termbox.ColorYellow, l: boxLen, b: boxWid},
 	}
 
-	colorMap := boardStruct{}
+	pawns := []interface{}{
+		point{color: termbox.ColorBlue, pos: pos{5, 3}},
+		point{color: termbox.ColorBlue, pos: pos{8, 3}},
+		point{color: termbox.ColorBlue, pos: pos{5, 5}},
+		point{color: termbox.ColorBlue, pos: pos{8, 5}},
 
-	cm := getColorMap(append(homeBoxes, borderBox...))
+		point{color: termbox.ColorGreen, pos: pos{19, 3}},
+		point{color: termbox.ColorGreen, pos: pos{22, 3}},
+		point{color: termbox.ColorGreen, pos: pos{19, 5}},
+		point{color: termbox.ColorGreen, pos: pos{22, 5}},
 
-	for col := range cm {
-		colorMap[col] = append(colorMap[col], cm[col]...)
+		point{color: termbox.ColorYellow, pos: pos{5, 9}},
+		point{color: termbox.ColorYellow, pos: pos{8, 9}},
+		point{color: termbox.ColorYellow, pos: pos{5, 11}},
+		point{color: termbox.ColorYellow, pos: pos{8, 11}},
+
+		point{color: termbox.ColorRed, pos: pos{19, 9}},
+		point{color: termbox.ColorRed, pos: pos{22, 9}},
+		point{color: termbox.ColorRed, pos: pos{19, 11}},
+		point{color: termbox.ColorRed, pos: pos{22, 11}},
 	}
 
-	return colorMap
+	cm := colorMap{}
+
+	c := getColorMap(
+		append(
+			append(
+				append(
+					[]interface{}{}, homeBoxes...,
+				), borderBox,
+			), pawns...,
+		),
+	)
+
+	cm.updateColorMap(c)
+
+	return cm
 }
 
 func (board *ludoBoard) setupBoard() {

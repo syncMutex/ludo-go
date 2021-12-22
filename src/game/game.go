@@ -41,7 +41,7 @@ mainloop:
 				break mainloop
 			}
 		default:
-			// a.board.renderBoard()
+			a.board.renderBoard()
 		}
 	}
 }
