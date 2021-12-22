@@ -10,7 +10,7 @@ type callback func()
 
 func (m *menuPagesType) keyboardLoop() callback {
 	kb := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
-	go keyboard.ListenToKeyboard(kb)
+	go keyboard.ListenToKeyboard(&kb)
 	for {
 		e := <-kb.EvChan
 		switch e.Key {
@@ -42,13 +42,14 @@ func (m *menuPagesType) keyboardLoop() callback {
 			fallthrough
 		case termbox.KeyEnter:
 			if quit, callback := m.handleOptSelect(); quit {
-				kb.StopKeyboardListen()
+				kb.Stop()
 				return callback
 			}
 		case termbox.KeyEsc:
-			kb.StopKeyboardListen()
+			kb.Stop()
 			return nil
 		}
+		kb.Done()
 		m.renderMenu()
 	}
 }

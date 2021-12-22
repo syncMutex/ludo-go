@@ -31,6 +31,7 @@ type box struct {
 }
 
 func (board *ludoBoard) renderBoard() {
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	for color := range board.boardData {
 		for _, p := range board.boardData[color] {
 			termbox.SetCell(p.x, p.y, p.ch, p.fg, p.bg)
@@ -116,7 +117,7 @@ func createBoardData() boardStruct {
 		{
 			pos:         pos{bx + 10, by + 4},
 			borderColor: termbox.ColorDefault,
-			l:           2, b: 5,
+			l:           2, b: 6,
 		},
 	}
 

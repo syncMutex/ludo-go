@@ -1,7 +1,7 @@
 package game
 
 import (
-	"time"
+	"ludo/src/keyboard"
 
 	"github.com/nsf/termbox-go"
 )
@@ -18,10 +18,36 @@ type arena struct {
 	curTurn int
 }
 
+func handleKeyboard(k keyboard.KeyboardEvent) bool {
+	switch k.Key {
+	case termbox.KeyEsc:
+		return true
+	}
+
+	return false
+}
+
+func (a *arena) gameLoop() {
+	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
+
+	go keyboard.ListenToKeyboard(&kChan)
+
+mainloop:
+	for {
+		select {
+		case ev := <-kChan.EvChan:
+			if handleKeyboard(ev) {
+				kChan.Stop()
+				break mainloop
+			}
+		default:
+			// a.board.renderBoard()
+		}
+	}
+}
+
 func StartGameOffline(players []PlayerData) {
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	termbox.Flush()
 	ar := arena{board: ludoBoard{}}
 	ar.board.setupBoard()
-	time.Sleep(time.Second * 5)
+	ar.gameLoop()
 }
