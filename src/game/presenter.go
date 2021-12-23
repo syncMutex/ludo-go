@@ -23,6 +23,13 @@ type point struct {
 	color termbox.Attribute
 }
 
+type line struct {
+	from   pos
+	axis   rune // 'x'(horizontal) or 'y'(vertical)
+	length int
+	color  termbox.Attribute
+}
+
 func boxColorMap(b box) colorMap {
 	cm := colorMap{}
 
@@ -70,6 +77,27 @@ func pointColorMap(pt point) colorMap {
 	return cm
 }
 
+func lineColorMap(ln line) colorMap {
+	cm := colorMap{}
+
+	switch ln.axis {
+	case 'x':
+		for i, x := 0, ln.from.x; i < ln.length; i, x = i+1, x+1 {
+			cm[ln.color] = append(cm[ln.color], cell{
+				x: x, y: ln.from.y, ch: '─', fg: ln.color,
+			})
+		}
+	case 'y':
+		for i, y := 0, ln.from.y+1; i < ln.length; i, y = i+1, y+1 {
+			cm[ln.color] = append(cm[ln.color], cell{
+				x: ln.from.x, y: y, ch: '│', fg: ln.color,
+			})
+		}
+	}
+
+	return cm
+}
+
 func (cm colorMap) mergeColorMap(args ...colorMap) {
 	for _, update := range args {
 		for col := range update {
@@ -86,6 +114,8 @@ func (e elementGroup) toColorMap() colorMap {
 			cm.mergeColorMap(boxColorMap(e))
 		case point:
 			cm.mergeColorMap(pointColorMap(e))
+		case line:
+			cm.mergeColorMap(lineColorMap(e))
 		}
 	}
 

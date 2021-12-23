@@ -29,48 +29,39 @@ func (board *ludoBoard) renderBoard() {
 }
 
 func createBoardData() colorMap {
-	bx, by := 1, 1
+	boardPos := pos{5, 2}
 
 	borderBox := box{
-		pos:         pos{bx, by},
+		pos:         pos{boardPos.x, boardPos.y},
 		borderColor: termbox.ColorWhite,
-		l:           11, w: 27,
+		l:           17, w: 38,
 	}
 
 	boxLen, boxWid := 3, 9
 
-	homeBorders := elementGroup{
-		box{pos: pos{bx + 2, by + 1}, borderColor: termbox.ColorBlue, l: boxLen, w: boxWid},
-		box{pos: pos{bx + 16, by + 1}, borderColor: termbox.ColorGreen, l: boxLen, w: boxWid},
-		box{pos: pos{bx + 16, by + 7}, borderColor: termbox.ColorRed, l: boxLen, w: boxWid},
-		box{pos: pos{bx + 2, by + 7}, borderColor: termbox.ColorYellow, l: boxLen, w: boxWid},
+	lx, rx, ty, by := boardPos.x+2, boardPos.x+26, boardPos.y+1, boardPos.y+13
+
+	relBoxPos := map[string]pos{
+		"lt": {lx, ty},
+		"rt": {rx, ty},
+		"lb": {lx, by},
+		"rb": {rx, by},
 	}
 
-	pawns := elementGroup{
-		point{color: termbox.ColorBlue, pos: pos{5, 3}},
-		point{color: termbox.ColorBlue, pos: pos{9, 3}},
-		point{color: termbox.ColorBlue, pos: pos{5, 5}},
-		point{color: termbox.ColorBlue, pos: pos{9, 5}},
-
-		point{color: termbox.ColorGreen, pos: pos{19, 3}},
-		point{color: termbox.ColorGreen, pos: pos{23, 3}},
-		point{color: termbox.ColorGreen, pos: pos{19, 5}},
-		point{color: termbox.ColorGreen, pos: pos{23, 5}},
-
-		point{color: termbox.ColorYellow, pos: pos{5, 9}},
-		point{color: termbox.ColorYellow, pos: pos{9, 9}},
-		point{color: termbox.ColorYellow, pos: pos{5, 11}},
-		point{color: termbox.ColorYellow, pos: pos{9, 11}},
-
-		point{color: termbox.ColorRed, pos: pos{19, 9}},
-		point{color: termbox.ColorRed, pos: pos{23, 9}},
-		point{color: termbox.ColorRed, pos: pos{19, 11}},
-		point{color: termbox.ColorRed, pos: pos{23, 11}},
+	homeBorders := elementGroup{
+		box{pos: relBoxPos["lt"], borderColor: termbox.ColorBlue, l: boxLen, w: boxWid},
+		box{pos: relBoxPos["rt"], borderColor: termbox.ColorGreen, l: boxLen, w: boxWid},
+		box{pos: relBoxPos["rb"], borderColor: termbox.ColorRed, l: boxLen, w: boxWid},
+		box{pos: relBoxPos["lb"], borderColor: termbox.ColorYellow, l: boxLen, w: boxWid},
+		box{pos: pos{relBoxPos["lt"].x + boxWid + 3, relBoxPos["lt"].y + boxLen + 3}, borderColor: termbox.ColorWhite, l: boxLen, w: boxWid},
 	}
 
 	cm := colorMap{}
 
-	cm.mergeColorMap(homeBorders.toColorMap(), elementGroup{borderBox}.toColorMap(), pawns.toColorMap())
+	cm.mergeColorMap(
+		homeBorders.toColorMap(),
+		elementGroup{borderBox}.toColorMap(),
+	)
 
 	return cm
 }
