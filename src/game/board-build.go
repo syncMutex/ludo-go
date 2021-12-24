@@ -32,9 +32,13 @@ func createBoardSkeleton(boardPos pos) colorMap {
 
 	paths := elementGroup{
 		fill{pos: pos{lx + boxWid + 6, ty}, l: 6, w: 6, ch: 0x2591},
+		fill{pos: pos{lx + boxWid + 8, ty}, l: 6, w: 2, ch: 0x2591, color: termbox.ColorGreen},
 		fill{pos: pos{lx, ty + boxLen + 4}, l: 3, w: 12, ch: 0x2591},
+		fill{pos: pos{lx, ty + boxLen + 5}, l: 1, w: 12, ch: 0x2591, color: termbox.ColorBlue},
 		fill{pos: pos{rx - 1, ty + boxLen + 4}, l: 3, w: 12, ch: 0x2591},
+		fill{pos: pos{rx - 1, ty + boxLen + 5}, l: 1, w: 12, ch: 0x2591, color: termbox.ColorRed},
 		fill{pos: pos{lx + boxWid + 6, by - 1}, l: 6, w: 6, ch: 0x2591},
+		fill{pos: pos{lx + boxWid + 8, by - 1}, l: 6, w: 2, ch: 0x2591, color: termbox.ColorYellow},
 	}
 
 	cm := colorMap{}

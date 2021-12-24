@@ -20,10 +20,8 @@ type elementGroup []interface{}
 
 func (board *ludoBoard) renderBoard() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	for color := range board.boardData {
-		for _, p := range board.boardData[color] {
-			termbox.SetCell(p.x, p.y, p.ch, p.fg, p.bg)
-		}
+	for _, p := range board.boardData {
+		termbox.SetCell(p.x, p.y, p.ch, p.fg, p.bg)
 	}
 	termbox.Flush()
 }
