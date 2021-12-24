@@ -21,6 +21,14 @@ type box struct {
 type point struct {
 	pos   pos
 	color termbox.Attribute
+	ch    rune
+}
+
+type fill struct {
+	pos   pos
+	l, w  int
+	ch    rune
+	color termbox.Attribute
 }
 
 type line struct {
@@ -72,8 +80,8 @@ func boxColorMap(b box) colorMap {
 
 func pointColorMap(pt point) colorMap {
 	cm := colorMap{}
-	cm[pt.color] = append(cm[pt.color], cell{x: pt.pos.x, y: pt.pos.y, ch: ' ', fg: termbox.ColorDefault, bg: pt.color})
-	cm[pt.color] = append(cm[pt.color], cell{x: pt.pos.x + 1, y: pt.pos.y, ch: ' ', fg: termbox.ColorDefault, bg: pt.color})
+	cm[pt.color] = append(cm[pt.color], cell{x: pt.pos.x, y: pt.pos.y, ch: pt.ch, fg: termbox.ColorDefault, bg: pt.color})
+	cm[pt.color] = append(cm[pt.color], cell{x: pt.pos.x + 1, y: pt.pos.y, ch: pt.ch, fg: termbox.ColorDefault, bg: pt.color})
 	return cm
 }
 
@@ -98,6 +106,24 @@ func lineColorMap(ln line) colorMap {
 	return cm
 }
 
+func fillColorMap(fl fill) colorMap {
+	cm := colorMap{}
+
+	y := fl.pos.y
+
+	for i := 0; i < fl.l; i++ {
+		for j, x := 0, fl.pos.x; j < fl.w; j++ {
+			cm[fl.color] = append(cm[fl.color], cell{
+				x: x, y: y, ch: fl.ch, fg: fl.color,
+			})
+			x++
+		}
+		y++
+	}
+
+	return cm
+}
+
 func (cm colorMap) mergeColorMap(args ...colorMap) {
 	for _, update := range args {
 		for col := range update {
@@ -116,6 +142,8 @@ func (e elementGroup) toColorMap() colorMap {
 			cm.mergeColorMap(pointColorMap(e))
 		case line:
 			cm.mergeColorMap(lineColorMap(e))
+		case fill:
+			cm.mergeColorMap(fillColorMap(e))
 		}
 	}
 
