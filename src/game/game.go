@@ -26,7 +26,7 @@ func handleKeyboard(k keyboard.KeyboardEvent) bool {
 	return false
 }
 
-func (a *arena) gameLoop() {
+func (a *arena) runGameLoop() {
 	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 
 	go keyboard.ListenToKeyboard(&kChan)
@@ -41,7 +41,7 @@ mainloop:
 			}
 			kChan.Done()
 		default:
-			a.board.renderBoard()
+			a.board.renderBoardLayer()
 		}
 	}
 }
@@ -49,5 +49,5 @@ mainloop:
 func StartGameOffline(players []PlayerData) {
 	ar := arena{board: ludoBoard{}}
 	ar.board.setupBoard()
-	ar.gameLoop()
+	ar.runGameLoop()
 }

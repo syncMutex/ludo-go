@@ -8,7 +8,7 @@ type pos struct{ x, y int }
 
 type ludoBoard struct {
 	pawnsLocations []pawnData
-	boardData      colorMap
+	boardLayer     cellMap
 }
 
 type pawnData struct {
@@ -18,26 +18,25 @@ type pawnData struct {
 
 type elementGroup []interface{}
 
-func (board *ludoBoard) renderBoard() {
+func (board *ludoBoard) renderBoardLayer() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	for _, p := range board.boardData {
+	for _, p := range board.boardLayer {
 		termbox.SetCell(p.x, p.y, p.ch, p.fg, p.bg)
 	}
 	termbox.Flush()
 }
 
-func createBoardData() colorMap {
+func boardLayerCellMap() cellMap {
 	boardPos := pos{5, 2}
 
-	cm := colorMap{}
-	cm.mergeColorMap(
+	cm := cellMap{}
+	cm.mergeCellMap(
 		createBoardSkeleton(boardPos),
 	)
 	return cm
 }
 
 func (board *ludoBoard) setupBoard() {
-	board.boardData = createBoardData()
-
-	board.renderBoard()
+	board.boardLayer = boardLayerCellMap()
+	board.renderBoardLayer()
 }

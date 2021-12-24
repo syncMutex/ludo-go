@@ -13,7 +13,7 @@ type cell struct {
 	fg   termbox.Attribute
 }
 
-type colorMap map[string]cell
+type cellMap map[string]cell
 
 type box struct {
 	pos         pos
@@ -46,14 +46,14 @@ func (c cell) mapKey() string {
 	return strconv.Itoa(c.x) + strconv.Itoa(c.y)
 }
 
-func (cm colorMap) setCells(args ...cell) {
+func (cm cellMap) setCells(args ...cell) {
 	for _, c := range args {
 		cm[c.mapKey()] = c
 	}
 }
 
-func boxColorMap(b box) colorMap {
-	cm := colorMap{}
+func boxCellMap(b box) cellMap {
+	cm := cellMap{}
 
 	// edges
 	edges := []cell{
@@ -84,8 +84,8 @@ func boxColorMap(b box) colorMap {
 	return cm
 }
 
-func pointColorMap(pt point) colorMap {
-	cm := colorMap{}
+func pointCellMap(pt point) cellMap {
+	cm := cellMap{}
 	cm.setCells(
 		cell{x: pt.pos.x, y: pt.pos.y, ch: pt.ch, fg: termbox.ColorDefault, bg: pt.color},
 		cell{x: pt.pos.x + 1, y: pt.pos.y, ch: pt.ch, fg: termbox.ColorDefault, bg: pt.color},
@@ -93,8 +93,8 @@ func pointColorMap(pt point) colorMap {
 	return cm
 }
 
-func lineColorMap(ln line) colorMap {
-	cm := colorMap{}
+func lineCellMap(ln line) cellMap {
+	cm := cellMap{}
 
 	switch ln.axis {
 	case 'x':
@@ -110,8 +110,8 @@ func lineColorMap(ln line) colorMap {
 	return cm
 }
 
-func fillColorMap(fl fill) colorMap {
-	cm := colorMap{}
+func fillCellMap(fl fill) cellMap {
+	cm := cellMap{}
 
 	y := fl.pos.y
 
@@ -126,7 +126,7 @@ func fillColorMap(fl fill) colorMap {
 	return cm
 }
 
-func (cm colorMap) mergeColorMap(args ...colorMap) {
+func (cm cellMap) mergeCellMap(args ...cellMap) {
 	for _, update := range args {
 		for cell := range update {
 			cm[update[cell].mapKey()] = update[cell]
@@ -134,18 +134,18 @@ func (cm colorMap) mergeColorMap(args ...colorMap) {
 	}
 }
 
-func (e elementGroup) toColorMap() colorMap {
-	cm := colorMap{}
+func (e elementGroup) toCellMap() cellMap {
+	cm := cellMap{}
 	for _, ele := range e {
 		switch e := ele.(type) {
 		case box:
-			cm.mergeColorMap(boxColorMap(e))
+			cm.mergeCellMap(boxCellMap(e))
 		case point:
-			cm.mergeColorMap(pointColorMap(e))
+			cm.mergeCellMap(pointCellMap(e))
 		case line:
-			cm.mergeColorMap(lineColorMap(e))
+			cm.mergeCellMap(lineCellMap(e))
 		case fill:
-			cm.mergeColorMap(fillColorMap(e))
+			cm.mergeCellMap(fillCellMap(e))
 		}
 	}
 

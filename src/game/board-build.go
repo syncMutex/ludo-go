@@ -2,7 +2,7 @@ package game
 
 import "github.com/nsf/termbox-go"
 
-func createBoardSkeleton(boardPos pos) colorMap {
+func createBoardSkeleton(boardPos pos) cellMap {
 	borderBox := box{
 		pos:         pos{boardPos.x, boardPos.y},
 		borderColor: termbox.ColorWhite,
@@ -28,7 +28,7 @@ func createBoardSkeleton(boardPos pos) colorMap {
 		box{pos: pos{relBoxPos["lt"].x + boxWid + 4, relBoxPos["lt"].y + boxLen + 3}, borderColor: termbox.ColorWhite, l: boxLen, w: boxWid},
 	}
 
-	// 0x2591
+	// 0x259
 
 	paths := elementGroup{
 		fill{pos: pos{lx + boxWid + 6, ty}, l: 6, w: 6, ch: 0x2591},
@@ -41,11 +41,11 @@ func createBoardSkeleton(boardPos pos) colorMap {
 		fill{pos: pos{lx + boxWid + 8, by - 1}, l: 6, w: 2, ch: 0x2591, color: termbox.ColorYellow},
 	}
 
-	cm := colorMap{}
-	cm.mergeColorMap(
-		homeBorders.toColorMap(),
-		elementGroup{borderBox}.toColorMap(),
-		paths.toColorMap(),
+	cm := cellMap{}
+	cm.mergeCellMap(
+		homeBorders.toCellMap(),
+		elementGroup{borderBox}.toCellMap(),
+		paths.toCellMap(),
 	)
 
 	return cm
