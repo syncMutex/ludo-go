@@ -2,16 +2,12 @@ package game
 
 import "github.com/nsf/termbox-go"
 
-func createBoardSkeleton(boardPos pos) cellMap {
+func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) cellMap {
 	borderBox := box{
 		pos:         pos{boardPos.x, boardPos.y},
 		borderColor: termbox.ColorWhite,
 		l:           17, w: 39,
 	}
-
-	lx, rx, ty, by := boardPos.x+2, boardPos.x+27, boardPos.y+1, boardPos.y+13
-
-	boxLen, boxWid := 3, 9
 
 	relBoxPos := map[string]pos{
 		"lt": {lx, ty},
@@ -30,22 +26,21 @@ func createBoardSkeleton(boardPos pos) cellMap {
 
 	// 0x259
 
-	paths := elementGroup{
-		fill{pos: pos{lx + boxWid + 6, ty}, l: 6, w: 6, ch: 0x2591},
-		fill{pos: pos{lx + boxWid + 8, ty}, l: 6, w: 2, ch: 0x2591, color: termbox.ColorGreen},
-		fill{pos: pos{lx, ty + boxLen + 4}, l: 3, w: 12, ch: 0x2591},
-		fill{pos: pos{lx, ty + boxLen + 5}, l: 1, w: 12, ch: 0x2591, color: termbox.ColorBlue},
-		fill{pos: pos{rx - 1, ty + boxLen + 4}, l: 3, w: 12, ch: 0x2591},
-		fill{pos: pos{rx - 1, ty + boxLen + 5}, l: 1, w: 12, ch: 0x2591, color: termbox.ColorRed},
-		fill{pos: pos{lx + boxWid + 6, by - 1}, l: 6, w: 6, ch: 0x2591},
-		fill{pos: pos{lx + boxWid + 8, by - 1}, l: 6, w: 2, ch: 0x2591, color: termbox.ColorYellow},
-	}
+	// paths := elementGroup{
+	// 	fill{pos: pos{lx + boxWid + 6, ty}, l: 6, w: 6, ch: 0x2591},
+	// 	fill{pos: pos{lx + boxWid + 8, ty}, l: 6, w: 2, ch: 0x2591, color: termbox.ColorGreen},
+	// 	fill{pos: pos{lx, ty + boxLen + 4}, l: 3, w: 12, ch: 0x2591},
+	// 	fill{pos: pos{lx, ty + boxLen + 5}, l: 1, w: 12, ch: 0x2591, color: termbox.ColorBlue},
+	// 	fill{pos: pos{rx - 1, ty + boxLen + 4}, l: 3, w: 12, ch: 0x2591},
+	// 	fill{pos: pos{rx - 1, ty + boxLen + 5}, l: 1, w: 12, ch: 0x2591, color: termbox.ColorRed},
+	// 	fill{pos: pos{lx + boxWid + 6, by - 1}, l: 6, w: 6, ch: 0x2591},
+	// 	fill{pos: pos{lx + boxWid + 8, by - 1}, l: 6, w: 2, ch: 0x2591, color: termbox.ColorYellow},
+	// }
 
 	cm := cellMap{}
 	cm.mergeCellMap(
 		homeBorders.toCellMap(),
 		elementGroup{borderBox}.toCellMap(),
-		paths.toCellMap(),
 	)
 
 	return cm

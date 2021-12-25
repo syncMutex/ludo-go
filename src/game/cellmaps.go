@@ -14,6 +14,7 @@ type cell struct {
 }
 
 type cellMap map[string]cell
+type cellSlice []cell
 
 type box struct {
 	pos         pos
@@ -132,6 +133,41 @@ func (cm cellMap) mergeCellMap(args ...cellMap) {
 			cm[update[cell].mapKey()] = update[cell]
 		}
 	}
+}
+
+func (cs *cellSlice) mergeCellSlice(args ...cellSlice) {
+	for _, update := range args {
+		*cs = append(*cs, update...)
+	}
+}
+
+func fillCellSlice(fl fill) cellSlice {
+	cs := cellSlice{}
+
+	y := fl.pos.y
+
+	for i := 0; i < fl.l; i++ {
+		for j, x := 0, fl.pos.x; j < fl.w; j++ {
+			cs = append(cs, cell{x: x, y: y, ch: fl.ch, fg: fl.color})
+			x++
+		}
+		y++
+	}
+
+	return cs
+}
+
+func (e elementGroup) toCellSlice() cellSlice {
+	cs := cellSlice{}
+
+	for _, ele := range e {
+		switch e := ele.(type) {
+		case fill:
+			cs.mergeCellSlice(fillCellSlice(e))
+		}
+	}
+
+	return cs
 }
 
 func (e elementGroup) toCellMap() cellMap {
