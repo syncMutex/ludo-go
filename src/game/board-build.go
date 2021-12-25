@@ -24,7 +24,7 @@ func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) cellM
 		box{pos: pos{relBoxPos["lt"].x + boxWid + 4, relBoxPos["lt"].y + boxLen + 3}, borderColor: termbox.ColorWhite, l: boxLen, w: boxWid},
 	}
 
-	// 0x259
+	// 0x2591
 
 	// paths := elementGroup{
 	// 	fill{pos: pos{lx + boxWid + 6, ty}, l: 6, w: 6, ch: 0x2591},

@@ -32,16 +32,19 @@ func (b *ludoBoard) render() {
 	termbox.Flush()
 }
 
+func setPathCell(x, y int, ch rune, fg, bg termbox.Attribute) {
+	termbox.SetCell(x, y, ch, fg, bg)
+	termbox.SetCell(x+1, y, ch, fg, bg)
+}
+
 func (b *ludoBoard) renderPathLayer() {
 	temp := b.pathLayer.ll.head
 
 	for temp != nil {
 		if temp.pawn != nil {
-			termbox.SetCell(temp.cell.x, temp.cell.y, temp.pawn.ch, temp.pawn.fg, temp.pawn.bg)
-			termbox.SetCell(temp.cell.x-1, temp.cell.y, temp.pawn.ch, temp.pawn.fg, temp.pawn.bg)
-			temp = temp.next
+			setPathCell(temp.cell.x, temp.cell.y, ' ', termbox.ColorDefault, temp.pawn.bg)
 		} else {
-			termbox.SetCell(temp.cell.x, temp.cell.y, temp.cell.ch, temp.cell.fg, temp.cell.bg)
+			setPathCell(temp.cell.x, temp.cell.y, temp.cell.ch, temp.cell.fg, temp.cell.bg)
 		}
 		temp = temp.next
 	}

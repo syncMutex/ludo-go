@@ -35,9 +35,9 @@ func (l *ludoBoard) test() {
 
 	for {
 		temp.pawn = &pawn
-		time.Sleep(time.Millisecond * 1000)
+		time.Sleep(time.Millisecond * 50)
 		temp.pawn = nil
-		temp = temp.next.next
+		temp = temp.next
 
 		if temp == nil {
 			temp = paths.head

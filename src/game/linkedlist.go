@@ -1,5 +1,11 @@
 package game
 
+type node struct {
+	cell cell
+	pawn *cell
+	next *node
+}
+
 type linkedlist struct {
 	head *node
 	tail *node
