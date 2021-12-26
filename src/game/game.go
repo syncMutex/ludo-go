@@ -37,7 +37,15 @@ func (l *ludoBoard) test() {
 		temp.pawn = &pawn
 		time.Sleep(time.Millisecond * 50)
 		temp.pawn = nil
-		temp = temp.next
+		if temp.next["toHome"] != nil {
+			if temp.next["toHome"].cell.fg == termbox.ColorYellow {
+				temp = temp.next["toHome"]
+			} else {
+				temp = temp.next["common"]
+			}
+		} else {
+			temp = temp.next["common"]
+		}
 
 		if temp == nil {
 			temp = paths.head

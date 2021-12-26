@@ -3,39 +3,27 @@ package game
 type node struct {
 	cell cell
 	pawn *cell
-	next *node
+	next map[string]*node
 }
 
 type linkedlist struct {
 	head *node
-	tail *node
-	size int
 }
 
-func (l *linkedlist) addEnd(c cell) {
-	newNode := &node{cell: c, next: nil}
+func (l *linkedlist) addEnd(c cell, fieldName string, temp *node) *node {
+	newNode := &node{cell: c, next: map[string]*node{}}
 
 	if l.head == nil {
 		l.head = newNode
-		l.tail = newNode
 	} else {
-		l.tail.next = newNode
-		l.tail = newNode
+		if temp == nil {
+			temp = l.head
+		}
+		for temp.next[fieldName] != nil {
+			temp = temp.next[fieldName]
+		}
+
+		temp.next[fieldName] = newNode
 	}
-
-	l.tail = newNode
-
-	l.size++
-}
-
-func (l *linkedlist) addStart(c cell) {
-	newNode := &node{cell: c, next: nil}
-	if l.head == nil {
-		l.head = newNode
-	} else {
-		newNode.next = l.head
-		l.head = newNode
-	}
-
-	l.size++
+	return newNode
 }

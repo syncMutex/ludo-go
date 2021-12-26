@@ -46,7 +46,18 @@ func (b *ludoBoard) renderPathLayer() {
 		} else {
 			setPathCell(temp.cell.x, temp.cell.y, temp.cell.ch, temp.cell.fg, temp.cell.bg)
 		}
-		temp = temp.next
+		if temp.next["toHome"] != nil {
+			temp2 := temp.next["toHome"]
+			for temp2 != nil {
+				if temp2.pawn != nil {
+					setPathCell(temp2.cell.x, temp2.cell.y, ' ', termbox.ColorDefault, temp2.pawn.bg)
+				} else {
+					setPathCell(temp2.cell.x, temp2.cell.y, temp2.cell.ch, temp2.cell.fg, temp2.cell.bg)
+				}
+				temp2 = temp2.next["toHome"]
+			}
+		}
+		temp = temp.next["common"]
 	}
 }
 
