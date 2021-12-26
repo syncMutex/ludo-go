@@ -2,7 +2,6 @@ package game
 
 import (
 	"ludo/src/keyboard"
-	"time"
 
 	"github.com/nsf/termbox-go"
 )
@@ -27,37 +26,10 @@ func handleKeyboard(k keyboard.KeyboardEvent) bool {
 	return false
 }
 
-func (l *ludoBoard) test() {
-	paths := l.pathLayer.ll
-	temp := paths.head
-
-	pawn := cell{bg: termbox.ColorBlue, ch: ' '}
-
-	for {
-		temp.pawn = &pawn
-		time.Sleep(time.Millisecond * 50)
-		temp.pawn = nil
-		if temp.next["toHome"] != nil {
-			if temp.next["toHome"].cell.fg == termbox.ColorYellow {
-				temp = temp.next["toHome"]
-			} else {
-				temp = temp.next["common"]
-			}
-		} else {
-			temp = temp.next["common"]
-		}
-
-		if temp == nil {
-			temp = paths.head
-		}
-	}
-}
-
 func (a *arena) runGameLoop() {
 	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 
 	go keyboard.ListenToKeyboard(&kChan)
-	go a.board.test()
 
 mainloop:
 	for {

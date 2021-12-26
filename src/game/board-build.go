@@ -2,7 +2,7 @@ package game
 
 import "github.com/nsf/termbox-go"
 
-func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) cellMap {
+func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players []player) cellMap {
 	borderBox := box{
 		pos:         pos{boardPos.x, boardPos.y},
 		borderColor: termbox.ColorWhite,
@@ -17,25 +17,13 @@ func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) cellM
 	}
 
 	homeBorders := elementGroup{
-		box{pos: relBoxPos["lt"], borderColor: termbox.ColorBlue, l: boxLen, w: boxWid},
-		box{pos: relBoxPos["rt"], borderColor: termbox.ColorGreen, l: boxLen, w: boxWid},
-		box{pos: relBoxPos["rb"], borderColor: termbox.ColorRed, l: boxLen, w: boxWid},
-		box{pos: relBoxPos["lb"], borderColor: termbox.ColorYellow, l: boxLen, w: boxWid},
+		box{pos: relBoxPos["lt"], borderColor: players[0].color, l: boxLen, w: boxWid},
+		box{pos: relBoxPos["rt"], borderColor: players[1].color, l: boxLen, w: boxWid},
+		box{pos: relBoxPos["rb"], borderColor: players[3].color, l: boxLen, w: boxWid},
+		box{pos: relBoxPos["lb"], borderColor: players[2].color, l: boxLen, w: boxWid},
+		// middle
 		box{pos: pos{relBoxPos["lt"].x + boxWid + 4, relBoxPos["lt"].y + boxLen + 3}, borderColor: termbox.ColorWhite, l: boxLen, w: boxWid},
 	}
-
-	// 0x2591
-
-	// paths := elementGroup{
-	// 	fill{pos: pos{lx + boxWid + 6, ty}, l: 6, w: 6, ch: 0x2591},
-	// 	fill{pos: pos{lx + boxWid + 8, ty}, l: 6, w: 2, ch: 0x2591, color: termbox.ColorGreen},
-	// 	fill{pos: pos{lx, ty + boxLen + 4}, l: 3, w: 12, ch: 0x2591},
-	// 	fill{pos: pos{lx, ty + boxLen + 5}, l: 1, w: 12, ch: 0x2591, color: termbox.ColorBlue},
-	// 	fill{pos: pos{rx - 1, ty + boxLen + 4}, l: 3, w: 12, ch: 0x2591},
-	// 	fill{pos: pos{rx - 1, ty + boxLen + 5}, l: 1, w: 12, ch: 0x2591, color: termbox.ColorRed},
-	// 	fill{pos: pos{lx + boxWid + 6, by - 1}, l: 6, w: 6, ch: 0x2591},
-	// 	fill{pos: pos{lx + boxWid + 8, by - 1}, l: 6, w: 2, ch: 0x2591, color: termbox.ColorYellow},
-	// }
 
 	cm := cellMap{}
 	cm.mergeCellMap(
@@ -44,4 +32,57 @@ func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) cellM
 	)
 
 	return cm
+}
+
+func createPawns(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) []player {
+	colors := []termbox.Attribute{
+		termbox.ColorBlue, termbox.ColorRed, termbox.ColorGreen, termbox.ColorYellow,
+	}
+
+	players := []player{}
+
+	relBoxPos := []pos{
+		{lx, ty},
+		{rx, ty},
+		{lx, by},
+		{rx, by},
+	}
+
+	for idx, color := range colors {
+		pawns := [4]map[string]*node{}
+
+		x, y := relBoxPos[idx].x, relBoxPos[idx].y
+
+		c := cell{x: x + 2, y: y + 1, bg: color, ch: ' '}
+		homeNode := &node{cell: c}
+		pawns[0] = map[string]*node{
+			"homeNode": homeNode,
+			"curNode":  homeNode,
+		}
+
+		c = cell{x: x + 6, y: y + 1, bg: color, ch: ' '}
+		homeNode = &node{cell: c}
+		pawns[1] = map[string]*node{
+			"homeNode": homeNode,
+			"curNode":  homeNode,
+		}
+
+		c = cell{x: x + 2, y: y + 3, bg: color, ch: ' '}
+		homeNode = &node{cell: c}
+		pawns[2] = map[string]*node{
+			"homeNode": homeNode,
+			"curNode":  homeNode,
+		}
+
+		c = cell{x: x + 6, y: y + 3, bg: color, ch: ' '}
+		homeNode = &node{cell: c}
+		pawns[3] = map[string]*node{
+			"homeNode": homeNode,
+			"curNode":  homeNode,
+		}
+
+		players = append(players, player{color: color, pawns: pawns})
+	}
+
+	return players
 }

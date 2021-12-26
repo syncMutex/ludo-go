@@ -2,7 +2,6 @@ package game
 
 type node struct {
 	cell cell
-	pawn *cell
 	next map[string]*node
 }
 

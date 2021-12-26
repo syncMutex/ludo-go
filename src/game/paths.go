@@ -25,6 +25,7 @@ func (cs *cellSlice) mergeCellSlice(args ...cellSlice) {
 	}
 }
 
+// 0x2591
 func (pc pathCell) toPathSlice() cellSlice {
 	cs := cellSlice{}
 
@@ -82,7 +83,7 @@ func (p *path) extToHome(from pos, axis rune, l, dir int, color termbox.Attribut
 	}
 }
 
-func createPathsLL(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) path {
+func createPathsLL(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players []player) path {
 	paths := path{}
 
 	paths.extend(pos{lx + boxWid + 6, by - 1}, 'y', 6, -1)
@@ -90,24 +91,24 @@ func createPathsLL(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) path {
 	paths.extend(pos{lx, ty + boxLen + 6}, 'x', 12, -1)
 
 	lastNode := paths.extend(pos{lx + 1, ty + boxLen + 5}, 'x', 2, 1)
-	paths.extToHome(pos{lx + 3, ty + boxLen + 5}, 'x', 10, 1, termbox.ColorBlue, lastNode)
+	paths.extToHome(pos{lx + 3, ty + boxLen + 5}, 'x', 10, 1, players[0].color, lastNode)
 	paths.extend(pos{lx + 1, ty + boxLen + 4}, 'x', 12, 1)
 
 	paths.extend(pos{lx + boxWid + 6, ty}, 'y', 6, -1)
 
 	lastNode = paths.extend(pos{lx + boxWid + 8, ty}, 'x', 2, -1)
-	paths.extToHome(pos{lx + boxWid + 8, ty + 2}, 'y', 5, 1, termbox.ColorGreen, lastNode)
+	paths.extToHome(pos{lx + boxWid + 8, ty + 2}, 'y', 5, 1, players[1].color, lastNode)
 	paths.extend(pos{lx + boxWid + 10, ty + 1}, 'y', 6, 1)
 
 	paths.extend(pos{rx, ty + boxLen + 4}, 'x', 12, 1)
 
 	lastNode = paths.extend(pos{rx - 1 + 10, ty + boxLen + 5}, 'x', 2, -1)
-	paths.extToHome(pos{rx - 1, ty + boxLen + 5}, 'x', 10, -1, termbox.ColorRed, lastNode)
+	paths.extToHome(pos{rx - 1, ty + boxLen + 5}, 'x', 10, -1, players[2].color, lastNode)
 	paths.extend(pos{rx - 1, ty + boxLen + 6}, 'x', 12, -1)
 
 	paths.extend(pos{lx + boxWid + 10, by}, 'y', 6, 1)
 	lastNode = paths.extend(pos{lx + boxWid + 8, by - 1 + 5}, 'x', 2, -1)
-	paths.extToHome(pos{lx + boxWid + 8, by - 1}, 'y', 5, -1, termbox.ColorYellow, lastNode)
+	paths.extToHome(pos{lx + boxWid + 8, by - 1}, 'y', 5, -1, players[3].color, lastNode)
 
 	return paths
 }
