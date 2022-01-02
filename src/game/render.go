@@ -1,6 +1,8 @@
 package game
 
-import "github.com/nsf/termbox-go"
+import (
+	"github.com/nsf/termbox-go"
+)
 
 func setCell(x, y int, ch rune, fg, bg termbox.Attribute) {
 	termbox.SetCell(x, y, ch, fg, bg)
@@ -29,11 +31,11 @@ func (b *ludoBoard) renderPathLayer() {
 	}
 }
 
-func (b *ludoBoard) renderHomeNodes() {
+func (b *ludoBoard) renderPawns() {
 	for _, p := range b.players {
 		for _, pawn := range p.pawns {
 			c := pawn["curNode"].cell
-			setCell(c.x, c.y, c.ch, c.fg, c.bg)
+			setCell(c.x, c.y, ' ', termbox.ColorDefault, p.color)
 		}
 	}
 }

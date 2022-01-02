@@ -26,3 +26,14 @@ func (l *linkedlist) addEnd(c cell, fieldName string, temp *node) *node {
 	}
 	return newNode
 }
+
+func (l *linkedlist) getNodeAt(idx int) *node {
+	n := l.head
+
+	for idx > 0 {
+		n = n.next["common"]
+		idx--
+	}
+
+	return n
+}

@@ -36,10 +36,10 @@ func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, playe
 
 func createPawns(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) []player {
 	colors := []termbox.Attribute{
-		termbox.ColorBlue, termbox.ColorRed, termbox.ColorGreen, termbox.ColorYellow,
+		termbox.ColorBlue, termbox.ColorRed, termbox.ColorYellow, termbox.ColorGreen,
 	}
 
-	players := []player{}
+	var players []player
 
 	relBoxPos := []pos{
 		{lx, ty},

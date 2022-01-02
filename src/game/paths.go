@@ -103,12 +103,12 @@ func createPathsLL(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players []p
 	paths.extend(pos{rx, ty + boxLen + 4}, 'x', 12, 1)
 
 	lastNode = paths.extend(pos{rx - 1 + 10, ty + boxLen + 5}, 'x', 2, -1)
-	paths.extToHome(pos{rx - 1, ty + boxLen + 5}, 'x', 10, -1, players[2].color, lastNode)
+	paths.extToHome(pos{rx - 1, ty + boxLen + 5}, 'x', 10, -1, players[3].color, lastNode)
 	paths.extend(pos{rx - 1, ty + boxLen + 6}, 'x', 12, -1)
 
 	paths.extend(pos{lx + boxWid + 10, by}, 'y', 6, 1)
 	lastNode = paths.extend(pos{lx + boxWid + 8, by - 1 + 5}, 'x', 2, -1)
-	paths.extToHome(pos{lx + boxWid + 8, by - 1}, 'y', 5, -1, players[3].color, lastNode)
+	paths.extToHome(pos{lx + boxWid + 8, by - 1}, 'y', 5, -1, players[2].color, lastNode)
 
 	return paths
 }
