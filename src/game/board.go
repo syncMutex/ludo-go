@@ -10,6 +10,7 @@ type ludoBoard struct {
 	players    []player
 	boardLayer cellMap
 	pathLayer  path
+	curPawn    int
 }
 
 type player struct {
@@ -23,8 +24,16 @@ func (b *ludoBoard) render() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	b.renderBoardLayer()
 	b.renderPathLayer()
-	b.renderPawns()
+	b.renderHome()
 	termbox.Flush()
+}
+
+func (b *ludoBoard) setHomeBg() {
+	for _, p := range b.players {
+		for _, pawn := range p.pawns {
+			pawn["curNode"].cell.bg = p.color
+		}
+	}
 }
 
 func boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players []player) cellMap {
@@ -59,4 +68,5 @@ func (board *ludoBoard) setupBoard() {
 	board.boardLayer = boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid, boardPos, board.players)
 	board.pathLayer = createPathsLL(lx, rx, ty, by, boxLen, boxWid, boardPos, board.players)
 	board.setOpeningPaths()
+	board.setHomeBg()
 }

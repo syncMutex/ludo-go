@@ -31,11 +31,11 @@ func (b *ludoBoard) renderPathLayer() {
 	}
 }
 
-func (b *ludoBoard) renderPawns() {
+func (b *ludoBoard) renderHome() {
 	for _, p := range b.players {
 		for _, pawn := range p.pawns {
 			c := pawn["curNode"].cell
-			setCell(c.x, c.y, ' ', termbox.ColorDefault, p.color)
+			setCell(c.x, c.y, ' ', termbox.ColorDefault, c.bg)
 		}
 	}
 }
