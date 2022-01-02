@@ -1,8 +1,6 @@
 package game
 
 import (
-	"time"
-
 	"github.com/nsf/termbox-go"
 )
 
@@ -51,21 +49,6 @@ func (l *ludoBoard) setOpeningPaths() {
 	}
 }
 
-func (l *ludoBoard) test() {
-	for {
-		time.Sleep(time.Millisecond * 200)
-		if l.players[0].pawns[0]["curNode"].next["toHome"] != nil && l.players[0].pawns[0]["curNode"].next["toHome"].cell.fg == l.players[0].color {
-			l.players[0].pawns[0]["curNode"] = l.players[0].pawns[0]["curNode"].next["toHome"]
-			continue
-		}
-		l.players[0].pawns[0]["curNode"] = l.players[0].pawns[0]["curNode"].next["common"]
-
-		if l.players[0].pawns[0]["curNode"] == nil {
-			l.players[0].pawns[0]["curNode"] = l.pathLayer.ll.head
-		}
-	}
-}
-
 func (board *ludoBoard) setupBoard() {
 	boardPos := pos{5, 2}
 	lx, rx, ty, by := boardPos.x+2, boardPos.x+27, boardPos.y+1, boardPos.y+13
@@ -76,5 +59,4 @@ func (board *ludoBoard) setupBoard() {
 	board.boardLayer = boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid, boardPos, board.players)
 	board.pathLayer = createPathsLL(lx, rx, ty, by, boxLen, boxWid, boardPos, board.players)
 	board.setOpeningPaths()
-	go board.test()
 }

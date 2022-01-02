@@ -19,12 +19,6 @@ type pathCell struct {
 	fg     termbox.Attribute
 }
 
-func (cs *cellSlice) mergeCellSlice(args ...cellSlice) {
-	for _, update := range args {
-		*cs = append(*cs, update...)
-	}
-}
-
 // 0x2591
 func (pc pathCell) toPathSlice() cellSlice {
 	cs := cellSlice{}
@@ -76,7 +70,7 @@ func (p *path) extend(from pos, axis rune, length, dir int) *node {
 	return lastNode
 }
 
-func (p *path) extToHome(from pos, axis rune, l, dir int, color termbox.Attribute, fromNode *node) {
+func (p *path) extToDest(from pos, axis rune, l, dir int, color termbox.Attribute, fromNode *node) {
 	pathSlice := pathCell{pos: from, axis: axis, ch: 0x2591, length: l, dir: dir, fg: color}.toPathSlice()
 	for _, ele := range pathSlice {
 		fromNode = p.ll.addEnd(ele, "toHome", fromNode)
@@ -91,24 +85,28 @@ func createPathsLL(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players []p
 	paths.extend(pos{lx, ty + boxLen + 6}, 'x', 12, -1)
 
 	lastNode := paths.extend(pos{lx + 1, ty + boxLen + 5}, 'x', 2, 1)
-	paths.extToHome(pos{lx + 3, ty + boxLen + 5}, 'x', 10, 1, players[0].color, lastNode)
+	paths.extToDest(pos{lx + 3, ty + boxLen + 5}, 'x', 10, 1, players[0].color, lastNode)
+	paths.extToDest(pos{lx + 15, ty + boxLen + 5}, 'x', 2, 1, players[0].color, lastNode)
 	paths.extend(pos{lx + 1, ty + boxLen + 4}, 'x', 12, 1)
 
 	paths.extend(pos{lx + boxWid + 6, ty}, 'y', 6, -1)
 
 	lastNode = paths.extend(pos{lx + boxWid + 8, ty}, 'x', 2, -1)
-	paths.extToHome(pos{lx + boxWid + 8, ty + 2}, 'y', 5, 1, players[1].color, lastNode)
+	paths.extToDest(pos{lx + boxWid + 8, ty + 2}, 'y', 5, 1, players[1].color, lastNode)
+	paths.extToDest(pos{lx + boxWid + 8, ty + 8}, 'y', 1, 1, players[1].color, lastNode)
 	paths.extend(pos{lx + boxWid + 10, ty + 1}, 'y', 6, 1)
 
 	paths.extend(pos{rx, ty + boxLen + 4}, 'x', 12, 1)
 
 	lastNode = paths.extend(pos{rx - 1 + 10, ty + boxLen + 5}, 'x', 2, -1)
-	paths.extToHome(pos{rx - 1, ty + boxLen + 5}, 'x', 10, -1, players[3].color, lastNode)
+	paths.extToDest(pos{rx - 1, ty + boxLen + 5}, 'x', 10, -1, players[3].color, lastNode)
+	paths.extToDest(pos{rx - 5, ty + boxLen + 5}, 'x', 2, -1, players[3].color, lastNode)
 	paths.extend(pos{rx - 1, ty + boxLen + 6}, 'x', 12, -1)
 
 	paths.extend(pos{lx + boxWid + 10, by}, 'y', 6, 1)
 	lastNode = paths.extend(pos{lx + boxWid + 8, by - 1 + 5}, 'x', 2, -1)
-	paths.extToHome(pos{lx + boxWid + 8, by - 1}, 'y', 5, -1, players[2].color, lastNode)
+	paths.extToDest(pos{lx + boxWid + 8, by - 1}, 'y', 5, -1, players[2].color, lastNode)
+	paths.extToDest(pos{lx + boxWid + 8, by - 3}, 'y', 1, -1, players[2].color, lastNode)
 
 	return paths
 }

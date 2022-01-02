@@ -2,6 +2,7 @@ package game
 
 import (
 	"ludo/src/keyboard"
+	"math/rand"
 
 	"github.com/nsf/termbox-go"
 )
@@ -12,8 +13,21 @@ type PlayerData struct {
 	Color termbox.Attribute
 }
 
+type dice struct {
+	value int
+}
+
+func (d *dice) roll() {
+	d.value = rand.Intn(5) + 1
+}
+
+func (d *dice) reset() {
+	d.value = 0
+}
+
 type arena struct {
 	players []PlayerData
+	dice    dice
 	board   ludoBoard
 	curTurn int
 }
@@ -47,7 +61,7 @@ mainloop:
 }
 
 func StartGameOffline(players []PlayerData) {
-	ar := arena{board: ludoBoard{}}
+	ar := arena{board: ludoBoard{}, players: players}
 	ar.board.setupBoard()
 	ar.runGameLoop()
 }
