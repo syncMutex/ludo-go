@@ -40,7 +40,7 @@ func (b *ludoBoard) renderPathLayer() {
 	}
 }
 
-func (b *ludoBoard) renderHome() {
+func (b *ludoBoard) renderPawns() {
 	for _, p := range b.players {
 		for _, pawn := range p.pawns {
 			c := pawn["curNode"].cell

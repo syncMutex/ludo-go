@@ -49,34 +49,34 @@ func createPawns(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) []player {
 	}
 
 	for idx, color := range colors {
-		pawns := [4]map[string]*node{}
+		pawns := [4]pawn{}
 
 		x, y := relBoxPos[idx].x, relBoxPos[idx].y
 
 		c := cell{x: x + 2, y: y + 1, bg: color, ch: ' '}
 		homeNode := &node{cell: c}
-		pawns[0] = map[string]*node{
+		pawns[0] = pawn{
 			"homeNode": homeNode,
 			"curNode":  homeNode,
 		}
 
 		c = cell{x: x + 6, y: y + 1, bg: color, ch: ' '}
 		homeNode = &node{cell: c}
-		pawns[1] = map[string]*node{
+		pawns[1] = pawn{
 			"homeNode": homeNode,
 			"curNode":  homeNode,
 		}
 
 		c = cell{x: x + 2, y: y + 3, bg: color, ch: ' '}
 		homeNode = &node{cell: c}
-		pawns[2] = map[string]*node{
+		pawns[2] = pawn{
 			"homeNode": homeNode,
 			"curNode":  homeNode,
 		}
 
 		c = cell{x: x + 6, y: y + 3, bg: color, ch: ' '}
 		homeNode = &node{cell: c}
-		pawns[3] = map[string]*node{
+		pawns[3] = pawn{
 			"homeNode": homeNode,
 			"curNode":  homeNode,
 		}

@@ -13,9 +13,11 @@ type ludoBoard struct {
 	curPawn    int
 }
 
+type pawn map[string]*node
+
 type player struct {
 	color termbox.Attribute
-	pawns [4]map[string]*node
+	pawns [4]pawn
 }
 
 type elementGroup []interface{}
@@ -23,7 +25,7 @@ type elementGroup []interface{}
 func (b *ludoBoard) render() {
 	b.renderBoardLayer()
 	b.renderPathLayer()
-	b.renderHome()
+	b.renderPawns()
 }
 
 func (b *ludoBoard) setHomeBg() {

@@ -9,7 +9,7 @@ type linkedlist struct {
 	head *node
 }
 
-func (l *linkedlist) addEnd(c cell, fieldName string, temp *node) *node {
+func (l *linkedlist) addEnd(c cell, pathName string, temp *node) *node {
 	newNode := &node{cell: c, next: map[string]*node{}}
 
 	if l.head == nil {
@@ -18,11 +18,11 @@ func (l *linkedlist) addEnd(c cell, fieldName string, temp *node) *node {
 		if temp == nil {
 			temp = l.head
 		}
-		for temp.next[fieldName] != nil {
-			temp = temp.next[fieldName]
+		for temp.next[pathName] != nil {
+			temp = temp.next[pathName]
 		}
 
-		temp.next[fieldName] = newNode
+		temp.next[pathName] = newNode
 	}
 	return newNode
 }

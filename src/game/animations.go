@@ -24,9 +24,13 @@ blinkloop:
 }
 
 func (a *arena) startBlinkCurPawn() {
+	a.isBlinkChOpen = true
 	go a.blinkCurPawn(a.blinkCh)
 }
 
 func (a *arena) stopBlinkCurPawn() {
-	a.blinkCh <- true
+	if a.isBlinkChOpen {
+		a.blinkCh <- true
+		a.isBlinkChOpen = false
+	}
 }

@@ -25,9 +25,9 @@ type arena struct {
 	players       []PlayerData
 	dice          dice
 	board         ludoBoard
-	pauseKeyboard bool
 	curTurn       int
 	blinkCh       chan bool
+	isBlinkChOpen bool
 }
 
 func (b *ludoBoard) setCurPawn(idx int) {
@@ -41,6 +41,13 @@ func (b *ludoBoard) setNextCurPawn(curTurn, mag int) {
 		b.curPawn = len(b.players[curTurn].pawns) - 1
 	} else if b.curPawn >= len(b.players[curTurn].pawns) {
 		b.curPawn = 0
+	}
+}
+
+func (a *arena) changePlayerTurn() {
+	a.curTurn++
+	if a.curTurn >= len(a.players) {
+		a.curTurn = 0
 	}
 }
 
@@ -60,6 +67,10 @@ func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
 		a.startBlinkCurPawn()
 	case termbox.KeySpace:
 		a.makeMove()
+		a.changePlayerTurn()
+		a.startBlinkCurPawn()
+		a.render()
+
 	case termbox.KeyEsc:
 		return true
 	}
@@ -70,13 +81,6 @@ func setRandSeed() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func (a *arena) test() {
-	for {
-		time.Sleep(time.Second)
-		a.dice.value = a.dice.roll()
-	}
-}
-
 func (a *arena) runGameLoop() {
 	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 
@@ -85,8 +89,6 @@ func (a *arena) runGameLoop() {
 	a.startBlinkCurPawn()
 	setRandSeed()
 	a.dice.value = a.dice.roll()
-
-	go a.test()
 
 mainloop:
 	for {
