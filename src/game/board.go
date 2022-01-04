@@ -21,11 +21,9 @@ type player struct {
 type elementGroup []interface{}
 
 func (b *ludoBoard) render() {
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	b.renderBoardLayer()
 	b.renderPathLayer()
 	b.renderHome()
-	termbox.Flush()
 }
 
 func (b *ludoBoard) setHomeBg() {

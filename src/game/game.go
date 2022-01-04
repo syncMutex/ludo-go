@@ -3,12 +3,12 @@ package game
 import (
 	"ludo/src/keyboard"
 	"math/rand"
+	"time"
 
 	"github.com/nsf/termbox-go"
 )
 
 type PlayerData struct {
-	Name  string
 	Type  string
 	Color termbox.Attribute
 }
@@ -17,12 +17,8 @@ type dice struct {
 	value int
 }
 
-func (d *dice) roll() {
-	d.value = rand.Intn(5) + 1
-}
-
-func (d *dice) reset() {
-	d.value = 0
+func (d *dice) roll() int {
+	return rand.Intn(6) + 1
 }
 
 type arena struct {
@@ -70,12 +66,27 @@ func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
 	return false
 }
 
+func setRandSeed() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+func (a *arena) test() {
+	for {
+		time.Sleep(time.Second)
+		a.dice.value = a.dice.roll()
+	}
+}
+
 func (a *arena) runGameLoop() {
 	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 
 	go keyboard.ListenToKeyboard(&kChan)
 	a.board.setCurPawn(0)
 	a.startBlinkCurPawn()
+	setRandSeed()
+	a.dice.value = a.dice.roll()
+
+	go a.test()
 
 mainloop:
 	for {
@@ -87,7 +98,7 @@ mainloop:
 			}
 			kChan.Done()
 		default:
-			a.board.render()
+			a.render()
 		}
 	}
 }

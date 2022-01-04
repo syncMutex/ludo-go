@@ -1,8 +1,17 @@
 package game
 
 import (
+	"strconv"
+
 	"github.com/nsf/termbox-go"
 )
+
+func (a *arena) render() {
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	a.board.render()
+	a.renderBottomSection()
+	termbox.Flush()
+}
 
 func setCell(x, y int, ch rune, fg, bg termbox.Attribute) {
 	termbox.SetCell(x, y, ch, fg, bg)
@@ -37,5 +46,23 @@ func (b *ludoBoard) renderHome() {
 			c := pawn["curNode"].cell
 			setCell(c.x, c.y, ' ', termbox.ColorDefault, c.bg)
 		}
+	}
+}
+
+func (a *arena) renderBottomSection() {
+	x, y := 10, 22
+	renderWhoseTurn(a.players[a.curTurn].Color, x, y)
+	renderText(x+2, y, "'s turn")
+	renderText(x+20, y, "dice: "+strconv.Itoa(a.dice.value))
+}
+
+func renderWhoseTurn(bg termbox.Attribute, x, y int) {
+	setCell(x, y, ' ', termbox.ColorDefault, bg)
+}
+
+func renderText(x, y int, text string) {
+	for i := range text {
+		termbox.SetChar(x, y, rune(text[i]))
+		x++
 	}
 }

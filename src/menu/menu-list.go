@@ -78,7 +78,7 @@ var (
 					curMenuOpts = curMenuOpts[:len(curMenuOpts)-2]
 
 					for _, opt := range curMenuOpts {
-						players = append(players, game.PlayerData{Name: "", Color: opt.label.(termbox.Attribute), Type: opt.subOpts[opt.curIdx]})
+						players = append(players, game.PlayerData{Color: opt.label.(termbox.Attribute), Type: opt.subOpts[opt.curIdx]})
 					}
 					return true, func() {
 						game.StartGameOffline(players)
