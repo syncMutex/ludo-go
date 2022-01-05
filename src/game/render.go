@@ -42,9 +42,15 @@ func (b *ludoBoard) renderPathLayer() {
 
 func (b *ludoBoard) renderPawns() {
 	for _, p := range b.players {
+		pkeys := make(map[string]int)
 		for _, pawn := range p.pawns {
 			c := pawn["curNode"].cell
 			setCell(c.x, c.y, ' ', termbox.ColorDefault, c.bg)
+
+			if _, has := pkeys[c.mapKey()]; has {
+				renderText(c.x, c.y, strconv.Itoa(pkeys[c.mapKey()]+1), termbox.ColorBlack)
+			}
+			pkeys[c.mapKey()]++
 		}
 	}
 }
@@ -52,17 +58,18 @@ func (b *ludoBoard) renderPawns() {
 func (a *arena) renderBottomSection() {
 	x, y := 10, 22
 	renderWhoseTurn(a.players[a.curTurn].Color, x, y)
-	renderText(x+2, y, "'s turn")
-	renderText(x+20, y, "dice: "+strconv.Itoa(a.dice.value))
+	renderText(x+2, y, "'s turn", termbox.ColorDefault)
+	renderText(x+20, y, "dice: "+strconv.Itoa(a.dice.value), termbox.ColorDefault)
 }
 
 func renderWhoseTurn(bg termbox.Attribute, x, y int) {
 	setCell(x, y, ' ', termbox.ColorDefault, bg)
 }
 
-func renderText(x, y int, text string) {
+func renderText(x, y int, text string, textColor termbox.Attribute) {
 	for i := range text {
 		termbox.SetChar(x, y, rune(text[i]))
+		termbox.SetFg(x, y, textColor)
 		x++
 	}
 }

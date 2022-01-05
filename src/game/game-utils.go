@@ -1,12 +1,19 @@
 package game
 
-import "github.com/nsf/termbox-go"
+import (
+	"time"
+
+	"github.com/nsf/termbox-go"
+)
 
 func (a *arena) makeMove() {
 	curPlayer := a.board.players[a.curTurn]
 	for i := 0; i < a.dice.value; i++ {
 		curPlayer.pawns[a.board.curPawn]["curNode"].cell.bg = termbox.ColorDefault
 		curPlayer.pawns[a.board.curPawn].moveNext("common", curPlayer.color)
+		a.render()
+		termbox.Flush()
+		time.Sleep(time.Millisecond * 100)
 	}
 }
 
