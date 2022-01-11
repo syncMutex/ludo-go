@@ -108,5 +108,7 @@ func createPathsLL(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players []p
 	paths.extToDest(pos{lx + boxWid + 8, by - 1}, 'y', 5, -1, players[2].color, lastNode)
 	paths.extToDest(pos{lx + boxWid + 8, by - 3}, 'y', 1, -1, players[2].color, lastNode)
 
+	lastNode.next["common"] = paths.ll.head
+
 	return paths
 }

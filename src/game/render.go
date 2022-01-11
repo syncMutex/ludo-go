@@ -31,8 +31,10 @@ func (b *ludoBoard) renderBoardLayer() {
 
 func (b *ludoBoard) renderPathLayer() {
 	temp := b.pathLayer.ll.head
+	setCell(temp.cell.x, temp.cell.y, temp.cell.ch, temp.cell.fg, temp.cell.bg)
+	temp = temp.next["common"]
 
-	for temp != nil {
+	for temp != b.pathLayer.ll.head {
 		setCell(temp.cell.x, temp.cell.y, temp.cell.ch, temp.cell.fg, temp.cell.bg)
 		if temp.next["toHome"] != nil {
 			temp2 := temp.next["toHome"]
