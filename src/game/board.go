@@ -44,7 +44,7 @@ func boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players
 	return cm
 }
 
-func (l *ludoBoard) setOpeningPaths() {
+func (l *ludoBoard) connectPawnsPosToPath() {
 	openingNodes := map[int]int{14: 0, 27: 1, 40: 3, 1: 2}
 
 	for i, j := range openingNodes {
@@ -67,6 +67,6 @@ func (board *ludoBoard) setupBoard() {
 	board.players = createPawns(lx, rx, ty, by, boxLen, boxWid, boardPos)
 	board.boardLayer = boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid, boardPos, board.players)
 	board.pathLayer = createPathsLL(lx, rx, ty, by, boxLen, boxWid, boardPos, board.players)
-	board.setOpeningPaths()
+	board.connectPawnsPosToPath()
 	board.setHomeBg()
 }

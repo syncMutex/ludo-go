@@ -7,18 +7,29 @@ import (
 )
 
 func (a *arena) blinkCurPawn(stopBlink <-chan bool) {
+	prevColor := termbox.ColorDefault
+	curCell := a.board.players[a.curTurn].pawns[a.board.curPawn]["curNode"].cell
+
+	toggleBg := func() {
+		if prevColor == termbox.ColorDefault {
+			setBg(curCell.x, curCell.y, a.board.players[a.curTurn].color)
+			prevColor = a.board.players[a.curTurn].color
+		} else {
+			setBg(curCell.x, curCell.y, termbox.ColorDefault)
+			prevColor = termbox.ColorDefault
+		}
+		termbox.Flush()
+	}
+
+	toggleBg()
+
 blinkloop:
 	for {
 		select {
 		case <-stopBlink:
 			break blinkloop
 		case <-time.After(time.Millisecond * 300):
-			curPawn := a.board.players[a.curTurn].pawns[a.board.curPawn]["curNode"]
-			if curPawn.cell.bg == termbox.ColorDefault {
-				curPawn.cell.bg = a.board.players[a.curTurn].color
-				continue
-			}
-			curPawn.cell.bg = termbox.ColorDefault
+			toggleBg()
 		}
 	}
 }

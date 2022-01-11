@@ -52,7 +52,8 @@ func (a *arena) changePlayerTurn() {
 }
 
 func (a *arena) repaintCurPawn() {
-	a.board.players[a.curTurn].pawns[a.board.curPawn]["curNode"].cell.bg = a.board.players[a.curTurn].color
+	curCell := a.board.players[a.curTurn].pawns[a.board.curPawn]["curNode"].cell
+	setBg(curCell.x, curCell.y, a.board.players[a.curTurn].color)
 }
 
 func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
@@ -86,22 +87,20 @@ func (a *arena) runGameLoop() {
 
 	go keyboard.ListenToKeyboard(&kChan)
 	a.board.setCurPawn(0)
-	a.startBlinkCurPawn()
 	setRandSeed()
 	a.dice.value = a.dice.roll()
 
+	a.render()
+	a.startBlinkCurPawn()
+
 mainloop:
 	for {
-		select {
-		case ev := <-kChan.EvChan:
-			if a.handleKeyboard(ev) {
-				kChan.Stop()
-				break mainloop
-			}
-			kChan.Done()
-		default:
-			a.render()
+		ev := <-kChan.EvChan
+		if a.handleKeyboard(ev) {
+			kChan.Stop()
+			break mainloop
 		}
+		kChan.Done()
 	}
 }
 

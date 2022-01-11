@@ -18,6 +18,11 @@ func setCell(x, y int, ch rune, fg, bg termbox.Attribute) {
 	termbox.SetCell(x+1, y, ch, fg, bg)
 }
 
+func setBg(x, y int, bg termbox.Attribute) {
+	termbox.SetBg(x, y, bg)
+	termbox.SetBg(x+1, y, bg)
+}
+
 func (b *ludoBoard) renderBoardLayer() {
 	for _, p := range b.boardLayer {
 		termbox.SetCell(p.x, p.y, p.ch, p.fg, p.bg)
@@ -45,7 +50,7 @@ func (b *ludoBoard) renderPawns() {
 		pkeys := make(map[string]int)
 		for _, pawn := range p.pawns {
 			c := pawn["curNode"].cell
-			setCell(c.x, c.y, ' ', termbox.ColorDefault, c.bg)
+			setCell(c.x, c.y, ' ', termbox.ColorDefault, p.color)
 
 			if _, has := pkeys[c.mapKey()]; has {
 				renderText(c.x, c.y, strconv.Itoa(pkeys[c.mapKey()]+1), termbox.ColorBlack)
