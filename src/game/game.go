@@ -17,10 +17,6 @@ type dice struct {
 	value int
 }
 
-func (d *dice) roll() int {
-	return rand.Intn(6) + 1
-}
-
 type arena struct {
 	players       []PlayerData
 	dice          dice
@@ -28,6 +24,10 @@ type arena struct {
 	curTurn       int
 	blinkCh       chan bool
 	isBlinkChOpen bool
+}
+
+func (d *dice) roll() int {
+	return rand.Intn(6) + 1
 }
 
 func (b *ludoBoard) setCurPawn(idx int) {
@@ -62,19 +62,20 @@ func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
 	switch k.Key {
 	case termbox.KeyArrowRight:
 		a.board.setNextCurPawn(a.curTurn, 1)
-		a.startBlinkCurPawn()
 	case termbox.KeyArrowLeft:
 		a.board.setNextCurPawn(a.curTurn, -1)
-		a.startBlinkCurPawn()
+	case termbox.KeyEnter:
+		fallthrough
 	case termbox.KeySpace:
 		a.makeMove()
 		a.changePlayerTurn()
-		a.startBlinkCurPawn()
-		a.render()
-
 	case termbox.KeyEsc:
 		return true
+	default:
+
 	}
+	a.render()
+	a.startBlinkCurPawn()
 	return false
 }
 

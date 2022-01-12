@@ -36,11 +36,11 @@ func (b *ludoBoard) renderPathLayer() {
 
 	for temp != b.pathLayer.ll.head {
 		setCell(temp.cell.x, temp.cell.y, temp.cell.ch, temp.cell.fg, temp.cell.bg)
-		if temp.next["toHome"] != nil {
-			temp2 := temp.next["toHome"]
+		if temp.next["toDest"] != nil {
+			temp2 := temp.next["toDest"]
 			for temp2 != nil {
 				setCell(temp2.cell.x, temp2.cell.y, temp2.cell.ch, temp2.cell.fg, temp2.cell.bg)
-				temp2 = temp2.next["toHome"]
+				temp2 = temp2.next["toDest"]
 			}
 		}
 		temp = temp.next["common"]

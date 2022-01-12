@@ -73,7 +73,7 @@ func (p *path) extend(from pos, axis rune, length, dir int) *node {
 func (p *path) extToDest(from pos, axis rune, l, dir int, color termbox.Attribute, fromNode *node) {
 	pathSlice := pathCell{pos: from, axis: axis, ch: 0x2591, length: l, dir: dir, fg: color}.toPathSlice()
 	for _, ele := range pathSlice {
-		fromNode = p.ll.addEnd(ele, "toHome", fromNode)
+		fromNode = p.ll.addEnd(ele, "toDest", fromNode)
 	}
 }
 
