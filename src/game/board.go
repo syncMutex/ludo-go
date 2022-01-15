@@ -51,20 +51,6 @@ func boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players
 	return cm
 }
 
-func (l *ludoBoard) connectPawnsPosToPath() {
-	openingNodes := map[int]int{14: 0, 27: 1, 40: 3, 1: 2}
-
-	for i, j := range openingNodes {
-		n := l.pathLayer.ll.getNodeAt(i - 1)
-
-		n.next["common"].cell.fg = l.players[j].color
-
-		for nidx := range &l.players[j].pawns {
-			l.players[j].pawns[nidx]["homeNode"].next = n.next
-		}
-	}
-}
-
 func (board *ludoBoard) setupBoard() {
 	boardPos := pos{5, 2}
 	lx, rx, ty, by := boardPos.x+2, boardPos.x+27, boardPos.y+1, boardPos.y+13

@@ -30,30 +30,17 @@ func (d *dice) roll() int {
 	return rand.Intn(6) + 1
 }
 
-func (b *ludoBoard) setCurPawn(idx int) {
-	b.curPawnIdx = idx
-}
-
-func (b *ludoBoard) setNextCurPawn(curTurn, mag int) {
-	b.setCurPawn(b.curPawnIdx + mag)
-
-	if b.curPawnIdx < 0 {
-		b.curPawnIdx = len(b.players[curTurn].pawns) - 1
-	} else if b.curPawnIdx >= len(b.players[curTurn].pawns) {
-		b.curPawnIdx = 0
-	}
-}
-
 func (a *arena) changePlayerTurn() {
 	a.curTurn++
 	if a.curTurn >= len(a.players) {
 		a.curTurn = 0
 	}
-}
 
-func (a *arena) repaintCurPawn() {
-	curCell := a.curPawn()["curNode"].cell
-	setBg(curCell.x, curCell.y, a.board.players[a.curTurn].color)
+	a.board.setCurPawn(0)
+
+	for a.curPawn().isAtDest() {
+		a.board.setNextCurPawn(a.curTurn, 1)
+	}
 }
 
 func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
@@ -61,19 +48,22 @@ func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
 	a.repaintCurPawn()
 	switch k.Key {
 	case termbox.KeyArrowRight:
-		a.board.setNextCurPawn(a.curTurn, 1)
+		for a.board.setNextCurPawn(a.curTurn, 1); a.curPawn().isAtDest(); {
+			a.board.setNextCurPawn(a.curTurn, 1)
+		}
 	case termbox.KeyArrowLeft:
-		a.board.setNextCurPawn(a.curTurn, -1)
+		for a.board.setNextCurPawn(a.curTurn, -1); a.curPawn().isAtDest(); {
+			a.board.setNextCurPawn(a.curTurn, -1)
+		}
 	case termbox.KeyEnter:
 		fallthrough
 	case termbox.KeySpace:
 		if hasDestroyed := a.makeMove(); !hasDestroyed {
 			a.changePlayerTurn()
 		}
+		a.dice.value = a.dice.roll()
 	case termbox.KeyEsc:
 		return true
-	default:
-
 	}
 	a.render()
 	a.startBlinkCurPawn()
