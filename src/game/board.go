@@ -10,7 +10,7 @@ type ludoBoard struct {
 	players    []player
 	boardLayer cellMap
 	pathLayer  path
-	curPawn    int
+	curPawnIdx int
 }
 
 type pawn map[string]*node
@@ -26,6 +26,13 @@ func (b *ludoBoard) render() {
 	b.renderBoardLayer()
 	b.renderPathLayer()
 	b.renderPawns()
+}
+
+func (p pawn) isAtDest() bool {
+	if p["curNode"].next["toDest"] == nil && p["curNode"].next["common"] == nil {
+		return true
+	}
+	return false
 }
 
 func (b *ludoBoard) setHomeBg() {

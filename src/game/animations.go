@@ -8,7 +8,7 @@ import (
 
 func (a *arena) blinkCurPawn(stopBlink <-chan bool) {
 	prevColor := termbox.ColorDefault
-	curCell := a.board.players[a.curTurn].pawns[a.board.curPawn]["curNode"].cell
+	curCell := a.curPawn()["curNode"].cell
 
 	toggleBg := func() {
 		if prevColor == termbox.ColorDefault {

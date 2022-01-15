@@ -31,16 +31,16 @@ func (d *dice) roll() int {
 }
 
 func (b *ludoBoard) setCurPawn(idx int) {
-	b.curPawn = idx
+	b.curPawnIdx = idx
 }
 
 func (b *ludoBoard) setNextCurPawn(curTurn, mag int) {
-	b.setCurPawn(b.curPawn + mag)
+	b.setCurPawn(b.curPawnIdx + mag)
 
-	if b.curPawn < 0 {
-		b.curPawn = len(b.players[curTurn].pawns) - 1
-	} else if b.curPawn >= len(b.players[curTurn].pawns) {
-		b.curPawn = 0
+	if b.curPawnIdx < 0 {
+		b.curPawnIdx = len(b.players[curTurn].pawns) - 1
+	} else if b.curPawnIdx >= len(b.players[curTurn].pawns) {
+		b.curPawnIdx = 0
 	}
 }
 
@@ -52,7 +52,7 @@ func (a *arena) changePlayerTurn() {
 }
 
 func (a *arena) repaintCurPawn() {
-	curCell := a.board.players[a.curTurn].pawns[a.board.curPawn]["curNode"].cell
+	curCell := a.curPawn()["curNode"].cell
 	setBg(curCell.x, curCell.y, a.board.players[a.curTurn].color)
 }
 
@@ -67,8 +67,9 @@ func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
 	case termbox.KeyEnter:
 		fallthrough
 	case termbox.KeySpace:
-		a.makeMove()
-		a.changePlayerTurn()
+		if hasDestroyed := a.makeMove(); !hasDestroyed {
+			a.changePlayerTurn()
+		}
 	case termbox.KeyEsc:
 		return true
 	default:
@@ -97,7 +98,7 @@ func (a *arena) runGameLoop() {
 mainloop:
 	for {
 		ev := <-kChan.EvChan
-		if a.handleKeyboard(ev) {
+		if stop := a.handleKeyboard(ev); stop {
 			kChan.Stop()
 			break mainloop
 		}
