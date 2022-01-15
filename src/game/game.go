@@ -3,6 +3,7 @@ package game
 import (
 	"ludo/src/keyboard"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/nsf/termbox-go"
@@ -27,7 +28,7 @@ type arena struct {
 }
 
 func (d *dice) roll() int {
-	return rand.Intn(6) + 1
+	return 6
 }
 
 func (a *arena) changePlayerTurn() {
@@ -93,6 +94,7 @@ mainloop:
 			break mainloop
 		}
 		kChan.Done()
+		os.Stdin.Sync()
 	}
 }
 
