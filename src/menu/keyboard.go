@@ -13,6 +13,7 @@ func (m *menuPagesType) keyboardLoop() callback {
 	go keyboard.ListenToKeyboard(&kb)
 	for {
 		e := <-kb.EvChan
+		kb.Pause()
 		switch e.Key {
 		case 's':
 			fallthrough
@@ -49,7 +50,7 @@ func (m *menuPagesType) keyboardLoop() callback {
 			kb.Stop()
 			return nil
 		}
-		kb.Done()
+		kb.Resume()
 		m.renderMenu()
 	}
 }

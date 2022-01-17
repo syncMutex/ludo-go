@@ -1,8 +1,6 @@
 package keyboard
 
 import (
-	"sync"
-
 	"github.com/nsf/termbox-go"
 )
 
@@ -12,25 +10,28 @@ type KeyboardEvent struct {
 }
 
 type KeyboardProps struct {
-	EvChan    chan KeyboardEvent
-	stopSig   chan bool
-	waitGroup sync.WaitGroup
+	EvChan   chan KeyboardEvent
+	stopSig  chan bool
+	isPaused bool
 }
 
 func (k *KeyboardProps) Stop() {
-	k.Done()
+	k.Resume()
 	k.stopSig <- true
 }
 
-func (k *KeyboardProps) Done() {
-	k.waitGroup.Done()
+func (k *KeyboardProps) Pause() {
+	k.isPaused = true
+}
+
+func (k *KeyboardProps) Resume() {
+	k.isPaused = false
 }
 
 func ListenToKeyboard(kbChans *KeyboardProps) {
 	termbox.SetInputMode(termbox.InputEsc)
 
-	kbChans.stopSig = make(chan bool)
-	kbChans.waitGroup = *new(sync.WaitGroup)
+	kbChans.stopSig = make(chan bool, 1)
 
 keyboardLoop:
 	for {
@@ -40,14 +41,15 @@ keyboardLoop:
 				break keyboardLoop
 			}
 		default:
-			kbChans.waitGroup.Add(1)
 			switch ev := termbox.PollEvent(); ev.Type {
 			case termbox.EventKey:
+				if kbChans.isPaused {
+					break
+				}
 				kbChans.EvChan <- KeyboardEvent{ev.Key, ev.Ch}
 			case termbox.EventError:
 				panic(ev.Err)
 			}
-			kbChans.waitGroup.Wait()
 		}
 	}
 }

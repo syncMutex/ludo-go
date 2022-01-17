@@ -81,6 +81,8 @@ var (
 						players = append(players, game.PlayerData{Color: opt.label.(termbox.Attribute), Type: opt.subOpts[opt.curIdx]})
 					}
 					return true, func() {
+						termbox.Close()
+						termbox.Init()
 						game.StartGameOffline(players)
 					}
 				},

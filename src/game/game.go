@@ -3,7 +3,6 @@ package game
 import (
 	"ludo/src/keyboard"
 	"math/rand"
-	"os"
 	"time"
 
 	"github.com/nsf/termbox-go"
@@ -89,12 +88,12 @@ func (a *arena) runGameLoop() {
 mainloop:
 	for {
 		ev := <-kChan.EvChan
+		kChan.Pause()
 		if stop := a.handleKeyboard(ev); stop {
 			kChan.Stop()
 			break mainloop
 		}
-		kChan.Done()
-		os.Stdin.Sync()
+		kChan.Resume()
 	}
 }
 
