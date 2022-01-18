@@ -16,8 +16,9 @@ type ludoBoard struct {
 type pawn map[string]*node
 
 type player struct {
-	color termbox.Attribute
-	pawns [4]pawn
+	winningPos int
+	color      termbox.Attribute
+	pawns      [4]pawn
 }
 
 type elementGroup []interface{}
@@ -26,13 +27,6 @@ func (b *ludoBoard) render() {
 	b.renderBoardLayer()
 	b.renderPathLayer()
 	b.renderPawns()
-}
-
-func (p pawn) isAtDest() bool {
-	if p["curNode"].next["toDest"] == nil && p["curNode"].next["common"] == nil {
-		return true
-	}
-	return false
 }
 
 func (b *ludoBoard) setHomeBg() {

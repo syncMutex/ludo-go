@@ -81,7 +81,7 @@ func createPawns(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) []player {
 			"curNode":  homeNode,
 		}
 
-		players = append(players, player{color: color, pawns: pawns})
+		players = append(players, player{color: color, pawns: pawns, winningPos: -1})
 	}
 
 	return players

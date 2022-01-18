@@ -49,3 +49,10 @@ func (a *arena) repaintCurPawn() {
 	curCell := a.curPawn()["curNode"].cell
 	setBg(curCell.x, curCell.y, a.board.players[a.curTurn].color)
 }
+
+func (p pawn) isAtDest() bool {
+	if p["curNode"].next["toDest"] == nil && p["curNode"].next["common"] == nil {
+		return true
+	}
+	return false
+}

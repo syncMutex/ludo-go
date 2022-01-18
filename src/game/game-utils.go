@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/nsf/termbox-go"
@@ -14,7 +15,7 @@ func (a *arena) curPlayer() player {
 	return a.board.players[a.curTurn]
 }
 
-func (a *arena) makeMove() (hasDestroyed bool) {
+func (a *arena) makeMove() (hasDestroyed bool, hasReachedDest bool) {
 	curPlayerColor := a.curPlayer().color
 	curPawn := a.curPawn()
 
@@ -29,10 +30,11 @@ func (a *arena) makeMove() (hasDestroyed bool) {
 			break
 		}
 		a.render()
-		time.Sleep(time.Millisecond * 100)
+		time.Sleep(time.Millisecond * 0)
 	}
 
 	hasDestroyed = a.checkDestroy()
+	hasReachedDest = curPawn.isAtDest()
 	a.render()
 
 	return
@@ -61,4 +63,19 @@ func (a *arena) checkDestroy() (hasDestroyed bool) {
 	}
 
 	return
+}
+
+func (p player) isAllPawnsAtDest() bool {
+	for _, p := range p.pawns {
+		if !p.isAtDest() {
+			return false
+		}
+	}
+	return true
+}
+
+func (a *arena) isGameOver() bool {
+	fmt.Println(a.nextWinningPos)
+	time.Sleep(time.Second * 3)
+	return a.nextWinningPos == 3
 }

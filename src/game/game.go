@@ -18,12 +18,13 @@ type dice struct {
 }
 
 type arena struct {
-	players       []PlayerData
-	dice          dice
-	board         ludoBoard
-	curTurn       int
-	blinkCh       chan bool
-	isBlinkChOpen bool
+	players        []PlayerData
+	dice           dice
+	board          ludoBoard
+	curTurn        int
+	blinkCh        chan bool
+	isBlinkChOpen  bool
+	nextWinningPos int
 }
 
 func (d *dice) roll() int {
@@ -39,18 +40,40 @@ func (a *arena) changePlayerTurn() {
 	a.board.setCurPawn(0)
 
 	if a.curPawn().isAtDest() || !a.curPawn().hasNPathsAhead(a.dice.value) {
-		a.validateAndSetNextCurPawn(1)
+		if ok := a.setNextCurPawnAndValidate(1); !ok {
+			a.dice.value = a.dice.roll()
+			a.render()
+			if !a.curPlayer().isAllPawnsAtDest() {
+				time.Sleep(time.Second)
+			}
+			a.changePlayerTurn()
+		}
 	}
 }
 
-func (a *arena) validateAndSetNextCurPawn(mag int) {
+func (a *arena) setNextCurPawnAndValidate(mag int) bool {
+	temp := a.board.curPawnIdx
 	for a.board.setNextCurPawn(a.curTurn, mag, a.dice.value); a.curPawn().isAtDest(); {
 		a.board.setNextCurPawn(a.curTurn, mag, a.dice.value)
+		if a.board.curPawnIdx == temp {
+			break
+		}
 	}
 
+	temp = a.board.curPawnIdx
 	for !a.curPawn().hasNPathsAhead(a.dice.value) {
 		a.board.setNextCurPawn(a.curTurn, mag, a.dice.value)
+		if a.board.curPawnIdx == temp {
+			return false
+		}
 	}
+
+	return true
+}
+
+func (a *arena) setCurPlayerWin() {
+	a.board.players[a.curTurn].winningPos = a.nextWinningPos + 1
+	a.nextWinningPos++
 }
 
 func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
@@ -58,18 +81,29 @@ func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
 	a.repaintCurPawn()
 	switch k.Key {
 	case termbox.KeyArrowRight:
-		a.validateAndSetNextCurPawn(1)
+		a.setNextCurPawnAndValidate(1)
 	case termbox.KeyArrowLeft:
-		a.validateAndSetNextCurPawn(-1)
+		a.setNextCurPawnAndValidate(-1)
 	case termbox.KeyEnter:
 		fallthrough
 	case termbox.KeySpace:
-		if hasDestroyed := a.makeMove(); !hasDestroyed {
-			a.dice.value = a.dice.roll()
+		hasDestroyed, hasReachedDest := a.makeMove()
+
+		if !hasDestroyed && !hasReachedDest {
 			a.changePlayerTurn()
-		} else {
-			a.dice.value = a.dice.roll()
+		} else if hasReachedDest {
+			if a.board.players[a.curTurn].isAllPawnsAtDest() {
+				a.setCurPlayerWin()
+				a.changePlayerTurn()
+				if a.isGameOver() {
+					a.setCurPlayerWin()
+					return true
+				}
+			} else if ok := a.setNextCurPawnAndValidate(1); !ok {
+				a.changePlayerTurn()
+			}
 		}
+		a.dice.value = a.dice.roll()
 	case termbox.KeyEsc:
 		return true
 	}
