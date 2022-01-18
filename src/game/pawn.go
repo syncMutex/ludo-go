@@ -18,7 +18,24 @@ func (b *ludoBoard) setCurPawn(idx int) {
 	b.curPawnIdx = idx
 }
 
-func (b *ludoBoard) setNextCurPawn(curTurn, mag int) {
+func (p pawn) hasNPathsAhead(n int) bool {
+	temp := p["curNode"]
+
+	if temp.next["common"] != nil && temp.next["toDest"] == nil {
+		return true
+	}
+
+	for i := 0; i < n; i++ {
+		temp = temp.next["toDest"]
+		if temp == nil {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (b *ludoBoard) setNextCurPawn(curTurn, mag, diceValue int) {
 	b.setCurPawn(b.curPawnIdx + mag)
 
 	if b.curPawnIdx < 0 {

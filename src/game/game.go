@@ -27,7 +27,7 @@ type arena struct {
 }
 
 func (d *dice) roll() int {
-	return 6
+	return rand.Intn(6) + 1
 }
 
 func (a *arena) changePlayerTurn() {
@@ -38,8 +38,18 @@ func (a *arena) changePlayerTurn() {
 
 	a.board.setCurPawn(0)
 
-	for a.curPawn().isAtDest() {
-		a.board.setNextCurPawn(a.curTurn, 1)
+	if a.curPawn().isAtDest() || !a.curPawn().hasNPathsAhead(a.dice.value) {
+		a.validateAndSetNextCurPawn(1)
+	}
+}
+
+func (a *arena) validateAndSetNextCurPawn(mag int) {
+	for a.board.setNextCurPawn(a.curTurn, mag, a.dice.value); a.curPawn().isAtDest(); {
+		a.board.setNextCurPawn(a.curTurn, mag, a.dice.value)
+	}
+
+	for !a.curPawn().hasNPathsAhead(a.dice.value) {
+		a.board.setNextCurPawn(a.curTurn, mag, a.dice.value)
 	}
 }
 
@@ -48,20 +58,18 @@ func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
 	a.repaintCurPawn()
 	switch k.Key {
 	case termbox.KeyArrowRight:
-		for a.board.setNextCurPawn(a.curTurn, 1); a.curPawn().isAtDest(); {
-			a.board.setNextCurPawn(a.curTurn, 1)
-		}
+		a.validateAndSetNextCurPawn(1)
 	case termbox.KeyArrowLeft:
-		for a.board.setNextCurPawn(a.curTurn, -1); a.curPawn().isAtDest(); {
-			a.board.setNextCurPawn(a.curTurn, -1)
-		}
+		a.validateAndSetNextCurPawn(-1)
 	case termbox.KeyEnter:
 		fallthrough
 	case termbox.KeySpace:
 		if hasDestroyed := a.makeMove(); !hasDestroyed {
+			a.dice.value = a.dice.roll()
 			a.changePlayerTurn()
+		} else {
+			a.dice.value = a.dice.roll()
 		}
-		a.dice.value = a.dice.roll()
 	case termbox.KeyEsc:
 		return true
 	}
