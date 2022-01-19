@@ -35,7 +35,7 @@ func (p pawn) hasNPathsAhead(n int) bool {
 	return true
 }
 
-func (b *ludoBoard) setNextCurPawn(curTurn, mag, diceValue int) {
+func (b *ludoBoard) setNextCurPawn(curTurn, mag int) {
 	b.setCurPawn(b.curPawnIdx + mag)
 
 	if b.curPawnIdx < 0 {
