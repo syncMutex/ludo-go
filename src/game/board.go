@@ -7,7 +7,7 @@ import (
 type pos struct{ x, y int }
 
 type ludoBoard struct {
-	players    []player
+	players    [4]player
 	boardLayer cellMap
 	pathLayer  path
 	curPawnIdx int
@@ -16,6 +16,7 @@ type ludoBoard struct {
 type pawn map[string]*node
 
 type player struct {
+	playerType string
 	winningPos int
 	color      termbox.Attribute
 	pawns      [4]pawn
@@ -31,13 +32,20 @@ func (b *ludoBoard) render() {
 
 func (b *ludoBoard) setHomeBg() {
 	for _, p := range b.players {
+		if !p.isParticipant() {
+			continue
+		}
 		for _, pawn := range p.pawns {
 			pawn["curNode"].cell.bg = p.color
 		}
 	}
 }
 
-func boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players []player) cellMap {
+func (p player) isParticipant() bool {
+	return p.playerType != "-"
+}
+
+func boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players [4]player) cellMap {
 	cm := cellMap{}
 	cm.mergeCellMap(
 		createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid, boardPos, players),
@@ -45,13 +53,13 @@ func boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players
 	return cm
 }
 
-func (board *ludoBoard) setupBoard() {
+func (board *ludoBoard) setupBoard(players []PlayerData) {
 	boardPos := pos{5, 2}
 	lx, rx, ty, by := boardPos.x+2, boardPos.x+27, boardPos.y+1, boardPos.y+13
 
 	boxLen, boxWid := 3, 9
 
-	board.players = createPawns(lx, rx, ty, by, boxLen, boxWid, boardPos)
+	board.players = createPawns(lx, rx, ty, by, boxLen, boxWid, boardPos, players)
 	board.boardLayer = boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid, boardPos, board.players)
 	board.pathLayer = createPathsLL(lx, rx, ty, by, boxLen, boxWid, boardPos, board.players)
 	board.connectPawnsPosToPath()

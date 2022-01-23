@@ -8,6 +8,10 @@ func (l *ludoBoard) connectPawnsPosToPath() {
 
 		n.next["common"].cell.fg = l.players[j].color
 
+		if !l.players[j].isParticipant() {
+			continue
+		}
+
 		for nidx := range &l.players[j].pawns {
 			l.players[j].pawns[nidx]["homeNode"].next = n.next
 		}

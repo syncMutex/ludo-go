@@ -49,6 +49,9 @@ func (b *ludoBoard) renderPathLayer() {
 
 func (b *ludoBoard) renderPawns() {
 	for _, p := range b.players {
+		if p.playerType == "-" {
+			continue
+		}
 		pkeys := make(map[string]int)
 		for _, pawn := range p.pawns {
 			c := pawn["curNode"].cell
@@ -83,9 +86,11 @@ func renderText(x, y int, text string, textColor termbox.Attribute) {
 
 func (a *arena) renderGameOver() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	leaderBoard := make([]termbox.Attribute, len(a.board.players))
+	leaderBoard := make([]termbox.Attribute, a.participantsCount)
 	for _, p := range a.board.players {
-		leaderBoard[p.winningPos-1] = p.color
+		if p.isParticipant() {
+			leaderBoard[p.winningPos-1] = p.color
+		}
 	}
 
 	x, y := 5, 5

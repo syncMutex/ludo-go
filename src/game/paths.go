@@ -77,7 +77,7 @@ func (p *path) extToDest(from pos, axis rune, l, dir int, color termbox.Attribut
 	}
 }
 
-func createPathsLL(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players []player) path {
+func createPathsLL(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players [4]player) path {
 	paths := path{}
 
 	paths.extend(pos{lx + boxWid + 6, by - 1}, 'y', 6, -1)

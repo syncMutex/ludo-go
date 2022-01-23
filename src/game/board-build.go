@@ -2,7 +2,7 @@ package game
 
 import "github.com/nsf/termbox-go"
 
-func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players []player) cellMap {
+func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players [4]player) cellMap {
 	borderBox := box{
 		pos:         pos{boardPos.x, boardPos.y},
 		borderColor: termbox.ColorWhite,
@@ -34,12 +34,8 @@ func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, playe
 	return cm
 }
 
-func createPawns(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) []player {
-	colors := []termbox.Attribute{
-		termbox.ColorBlue, termbox.ColorRed, termbox.ColorYellow, termbox.ColorGreen,
-	}
-
-	var players []player
+func createPawns(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, playersData []PlayerData) [4]player {
+	var players [4]player
 
 	relBoxPos := []pos{
 		{lx, ty},
@@ -48,40 +44,46 @@ func createPawns(lx, rx, ty, by, boxLen, boxWid int, boardPos pos) []player {
 		{rx, by},
 	}
 
-	for idx, color := range colors {
+	for idx, p := range playersData {
+		players[idx].playerType = p.Type
+		if p.Type == "-" {
+			players[idx].color = p.Color
+			continue
+		}
+
 		pawns := [4]pawn{}
 
 		x, y := relBoxPos[idx].x, relBoxPos[idx].y
 
-		c := cell{x: x + 2, y: y + 1, bg: color, ch: ' '}
+		c := cell{x: x + 2, y: y + 1, bg: p.Color, ch: ' '}
 		homeNode := &node{cell: c}
 		pawns[0] = pawn{
 			"homeNode": homeNode,
 			"curNode":  homeNode,
 		}
 
-		c = cell{x: x + 6, y: y + 1, bg: color, ch: ' '}
+		c = cell{x: x + 6, y: y + 1, bg: p.Color, ch: ' '}
 		homeNode = &node{cell: c}
 		pawns[1] = pawn{
 			"homeNode": homeNode,
 			"curNode":  homeNode,
 		}
 
-		c = cell{x: x + 2, y: y + 3, bg: color, ch: ' '}
+		c = cell{x: x + 2, y: y + 3, bg: p.Color, ch: ' '}
 		homeNode = &node{cell: c}
 		pawns[2] = pawn{
 			"homeNode": homeNode,
 			"curNode":  homeNode,
 		}
 
-		c = cell{x: x + 6, y: y + 3, bg: color, ch: ' '}
+		c = cell{x: x + 6, y: y + 3, bg: p.Color, ch: ' '}
 		homeNode = &node{cell: c}
 		pawns[3] = pawn{
 			"homeNode": homeNode,
 			"curNode":  homeNode,
 		}
 
-		players = append(players, player{color: color, pawns: pawns, winningPos: -1})
+		players[idx] = player{color: p.Color, pawns: pawns, winningPos: -1}
 	}
 
 	return players

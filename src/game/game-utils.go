@@ -48,7 +48,7 @@ func (a *arena) checkDestroy() (hasDestroyed bool) {
 	curCell := a.curPawn()["curNode"].cell
 
 	for i, p := range a.board.players {
-		if i == a.curTurn {
+		if i == a.curTurn || !p.isParticipant() {
 			continue
 		}
 
@@ -74,5 +74,5 @@ func (p player) isAllPawnsAtDest() bool {
 }
 
 func (a *arena) isGameOver() bool {
-	return a.nextWinningPos >= 3
+	return a.nextWinningPos >= a.participantsCount-1
 }

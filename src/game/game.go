@@ -18,13 +18,14 @@ type dice struct {
 }
 
 type arena struct {
-	players        []PlayerData
-	dice           dice
-	board          ludoBoard
-	curTurn        int
-	blinkCh        chan bool
-	isBlinkChOpen  bool
-	nextWinningPos int
+	players           []PlayerData
+	dice              dice
+	board             ludoBoard
+	curTurn           int
+	blinkCh           chan bool
+	isBlinkChOpen     bool
+	nextWinningPos    int
+	participantsCount int
 }
 
 func (d *dice) roll() {
@@ -36,9 +37,15 @@ func (a *arena) changePlayerTurn(idx ...int) bool {
 		a.curTurn = idx[0]
 	} else {
 		a.curTurn++
-	}
-	if a.curTurn >= len(a.players) {
-		a.curTurn = 0
+		if a.curTurn >= len(a.players) {
+			a.curTurn = 0
+		}
+		for !a.curPlayer().isParticipant() {
+			a.curTurn++
+			if a.curTurn >= len(a.players) {
+				a.curTurn = 0
+			}
+		}
 	}
 
 	if a.curPlayer().isAllPawnsAtDest() {
@@ -140,7 +147,8 @@ func (a *arena) runGameLoop() {
 	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 
 	go keyboard.ListenToKeyboard(&kChan)
-	a.changePlayerTurn(2)
+	a.changePlayerTurn(1)
+	a.changePlayerTurnAndValidate()
 	a.board.setCurPawn(0)
 	setRandSeed()
 	a.dice.roll()
@@ -161,7 +169,13 @@ mainloop:
 }
 
 func StartGameOffline(players []PlayerData) {
-	ar := arena{board: ludoBoard{}, players: players, blinkCh: make(chan bool), nextWinningPos: 0}
-	ar.board.setupBoard()
+	participantsCount := 0
+	for _, p := range players {
+		if p.Type != "-" {
+			participantsCount++
+		}
+	}
+	ar := arena{participantsCount: participantsCount, board: ludoBoard{}, players: players, blinkCh: make(chan bool), nextWinningPos: 0}
+	ar.board.setupBoard(players)
 	ar.runGameLoop()
 }
