@@ -31,8 +31,12 @@ func (d *dice) roll() {
 	d.value = rand.Intn(6) + 1
 }
 
-func (a *arena) changePlayerTurn() bool {
-	a.curTurn++
+func (a *arena) changePlayerTurn(idx ...int) bool {
+	if len(idx) == 1 {
+		a.curTurn = idx[0]
+	} else {
+		a.curTurn++
+	}
 	if a.curTurn >= len(a.players) {
 		a.curTurn = 0
 	}
@@ -76,8 +80,10 @@ func (a *arena) setCurPlayerWin() {
 
 func (a *arena) changePlayerTurnAndValidate() {
 	ok := a.changePlayerTurn()
+	a.render()
 	for !ok {
-		time.Sleep(time.Second * 2)
+		a.render()
+		time.Sleep(time.Millisecond * 1500)
 		a.dice.roll()
 		a.render()
 		ok = a.changePlayerTurn()
@@ -85,6 +91,10 @@ func (a *arena) changePlayerTurnAndValidate() {
 }
 
 func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
+	if a.isGameOver() {
+		return k.Key == termbox.KeyEsc
+	}
+
 	a.stopBlinkCurPawn()
 	a.repaintCurPawn()
 	switch k.Key {
@@ -97,13 +107,17 @@ func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
 	case termbox.KeySpace:
 		hasDestroyed, hasReachedDest := a.makeMove()
 		a.dice.roll()
+		a.render()
 		if !hasDestroyed && !hasReachedDest {
 			a.changePlayerTurnAndValidate()
 		} else if hasReachedDest {
 			if a.curPlayer().isAllPawnsAtDest() {
 				a.setCurPlayerWin()
 				if a.isGameOver() {
-					return true
+					a.changePlayerTurn()
+					a.setCurPlayerWin()
+					a.renderGameOver()
+					return false
 				}
 			}
 			if ok := a.setNextCurPawnAndValidate(1); !ok {
@@ -126,6 +140,7 @@ func (a *arena) runGameLoop() {
 	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 
 	go keyboard.ListenToKeyboard(&kChan)
+	a.changePlayerTurn(2)
 	a.board.setCurPawn(0)
 	setRandSeed()
 	a.dice.roll()
@@ -146,7 +161,7 @@ mainloop:
 }
 
 func StartGameOffline(players []PlayerData) {
-	ar := arena{board: ludoBoard{}, players: players, blinkCh: make(chan bool)}
+	ar := arena{board: ludoBoard{}, players: players, blinkCh: make(chan bool), nextWinningPos: 0}
 	ar.board.setupBoard()
 	ar.runGameLoop()
 }

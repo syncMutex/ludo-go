@@ -80,3 +80,26 @@ func renderText(x, y int, text string, textColor termbox.Attribute) {
 		x++
 	}
 }
+
+func (a *arena) renderGameOver() {
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	leaderBoard := make([]termbox.Attribute, len(a.board.players))
+	for _, p := range a.board.players {
+		leaderBoard[p.winningPos-1] = p.color
+	}
+
+	x, y := 5, 5
+
+	renderText(x+5, y-3, "Game Over!", termbox.ColorGreen)
+
+	for i, p := range leaderBoard {
+		x = 5
+		renderText(x, y, strconv.Itoa(i+1), termbox.ColorDefault)
+		setBg(x+3, y, p)
+		y += 2
+	}
+
+	renderText(x+2, y+2, "press esc to exit.", termbox.ColorGreen)
+
+	termbox.Flush()
+}

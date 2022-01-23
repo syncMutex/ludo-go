@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/nsf/termbox-go"
@@ -75,7 +74,5 @@ func (p player) isAllPawnsAtDest() bool {
 }
 
 func (a *arena) isGameOver() bool {
-	fmt.Println(a.nextWinningPos)
-	time.Sleep(time.Second * 3)
-	return a.nextWinningPos == 3
+	return a.nextWinningPos >= 3
 }
