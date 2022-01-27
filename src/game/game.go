@@ -26,6 +26,7 @@ type arena struct {
 	isBlinkChOpen     bool
 	nextWinningPos    int
 	participantsCount int
+	bots              map[int][4]int
 }
 
 func (d *dice) roll() {
@@ -156,6 +157,12 @@ func (a *arena) runGameLoop() {
 	a.render()
 	a.startBlinkCurPawn()
 
+	for a.curPlayer().isBot() {
+		a.playBot()
+		if a.isGameOver() {
+			break
+		}
+	}
 mainloop:
 	for {
 		ev := <-kChan.EvChan
@@ -163,6 +170,12 @@ mainloop:
 		if stop := a.handleKeyboard(ev); stop {
 			kChan.Stop()
 			break mainloop
+		}
+		for a.curPlayer().isBot() {
+			a.playBot()
+			if a.isGameOver() {
+				break
+			}
 		}
 		kChan.Resume()
 	}
@@ -175,7 +188,15 @@ func StartGameOffline(players []PlayerData) {
 			participantsCount++
 		}
 	}
-	ar := arena{participantsCount: participantsCount, board: ludoBoard{}, players: players, blinkCh: make(chan bool), nextWinningPos: 0}
-	ar.board.setupBoard(players)
-	ar.runGameLoop()
+	a := arena{
+		participantsCount: participantsCount,
+		board:             ludoBoard{},
+		players:           players,
+		blinkCh:           make(chan bool),
+		nextWinningPos:    0,
+		bots:              make(map[int][4]int),
+	}
+	a.board.setupBoard(players)
+	a.botsInit()
+	a.runGameLoop()
 }

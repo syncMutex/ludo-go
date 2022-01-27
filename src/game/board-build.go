@@ -1,6 +1,8 @@
 package game
 
-import "github.com/nsf/termbox-go"
+import (
+	"github.com/nsf/termbox-go"
+)
 
 func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players [4]player) cellMap {
 	borderBox := box{
@@ -45,8 +47,8 @@ func createPawns(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, playersData [
 	}
 
 	for idx, p := range playersData {
-		players[idx].playerType = p.Type
 		if p.Type == "-" {
+			players[idx].playerType = p.Type
 			players[idx].color = p.Color
 			continue
 		}
@@ -83,7 +85,7 @@ func createPawns(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, playersData [
 			"curNode":  homeNode,
 		}
 
-		players[idx] = player{color: p.Color, pawns: pawns, winningPos: -1}
+		players[idx] = player{color: p.Color, pawns: pawns, winningPos: -1, playerType: p.Type}
 	}
 
 	return players

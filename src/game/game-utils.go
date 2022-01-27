@@ -6,7 +6,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func (a *arena) curPawn(field ...string) pawn {
+func (a *arena) curPawn() pawn {
 	return a.curPlayer().pawns[a.board.curPawnIdx]
 }
 
@@ -52,10 +52,13 @@ func (a *arena) checkDestroy() (hasDestroyed bool) {
 			continue
 		}
 
-		for _, _pawn := range p.pawns {
+		for j, _pawn := range p.pawns {
 			c := _pawn["curNode"].cell
 			if c.x == curCell.x && c.y == curCell.y {
 				hasDestroyed = true
+				if a.curPlayer().isBot() {
+					a.resetBotPawn(i, j)
+				}
 				_pawn["curNode"] = _pawn["homeNode"]
 			}
 		}

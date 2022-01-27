@@ -45,6 +45,10 @@ func (p player) isParticipant() bool {
 	return p.playerType != "-"
 }
 
+func (p player) isBot() bool {
+	return p.playerType == "Bot"
+}
+
 func boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players [4]player) cellMap {
 	cm := cellMap{}
 	cm.mergeCellMap(
