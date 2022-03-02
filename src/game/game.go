@@ -1,25 +1,18 @@
 package game
 
 import (
+	gameUtils "ludo/src/game-utils"
 	"ludo/src/keyboard"
+	"ludo/src/network"
 	"math/rand"
 	"time"
 
 	"github.com/nsf/termbox-go"
 )
 
-type PlayerData struct {
-	Type  string
-	Color termbox.Attribute
-}
-
-type dice struct {
-	value int
-}
-
-type arena struct {
-	players           []PlayerData
-	dice              dice
+type Arena struct {
+	players           []gameUtils.PlayerData
+	Dice              gameUtils.Dice
 	board             ludoBoard
 	curTurn           int
 	blinkCh           chan bool
@@ -27,13 +20,10 @@ type arena struct {
 	nextWinningPos    int
 	participantsCount int
 	bots              map[int][4]int
+	kChan             keyboard.KeyboardProps
 }
 
-func (d *dice) roll() {
-	d.value = rand.Intn(6) + 1
-}
-
-func (a *arena) changePlayerTurn(idx ...int) bool {
+func (a *Arena) changePlayerTurn(idx ...int) bool {
 	if len(idx) == 1 {
 		a.curTurn = idx[0]
 	} else {
@@ -54,14 +44,14 @@ func (a *arena) changePlayerTurn(idx ...int) bool {
 	}
 
 	a.board.setCurPawn(0)
-	if a.curPawn().isAtDest() || !a.curPawn().hasNPathsAhead(a.dice.value) {
+	if a.curPawn().isAtDest() || !a.curPawn().hasNPathsAhead(a.Dice.Value) {
 		return a.setNextCurPawnAndValidate(1)
 	}
 
 	return true
 }
 
-func (a *arena) setNextCurPawnAndValidate(mag int) bool {
+func (a *Arena) setNextCurPawnAndValidate(mag int) bool {
 	temp := a.board.curPawnIdx
 	for a.board.setNextCurPawn(a.curTurn, mag); a.curPawn().isAtDest(); {
 		a.board.setNextCurPawn(a.curTurn, mag)
@@ -71,7 +61,7 @@ func (a *arena) setNextCurPawnAndValidate(mag int) bool {
 	}
 
 	temp = a.board.curPawnIdx
-	for !a.curPawn().hasNPathsAhead(a.dice.value) {
+	for !a.curPawn().hasNPathsAhead(a.Dice.Value) {
 		a.board.setNextCurPawn(a.curTurn, mag)
 		if a.board.curPawnIdx == temp {
 			return false
@@ -81,24 +71,24 @@ func (a *arena) setNextCurPawnAndValidate(mag int) bool {
 	return true
 }
 
-func (a *arena) setCurPlayerWin() {
+func (a *Arena) setCurPlayerWin() {
 	a.board.players[a.curTurn].winningPos = a.nextWinningPos + 1
 	a.nextWinningPos++
 }
 
-func (a *arena) changePlayerTurnAndValidate() {
+func (a *Arena) changePlayerTurnAndValidate() {
 	ok := a.changePlayerTurn()
 	a.render()
 	for !ok {
 		a.render()
 		time.Sleep(time.Millisecond * 1500)
-		a.dice.roll()
+		a.Dice.Roll()
 		a.render()
 		ok = a.changePlayerTurn()
 	}
 }
 
-func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
+func (a *Arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
 	if a.isGameOver() {
 		return k.Key == termbox.KeyEsc
 	}
@@ -114,7 +104,7 @@ func (a *arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
 		fallthrough
 	case termbox.KeySpace:
 		hasDestroyed, hasReachedDest := a.makeMove()
-		a.dice.roll()
+		a.Dice.Roll()
 		a.render()
 		if !hasDestroyed && !hasReachedDest {
 			a.changePlayerTurnAndValidate()
@@ -144,15 +134,15 @@ func setRandSeed() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func (a *arena) runGameLoop() {
-	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
+func (a *Arena) runGameLoop() {
+	kChan := a.kChan
 
 	go keyboard.ListenToKeyboard(&kChan)
 	a.changePlayerTurn(1)
 	a.changePlayerTurnAndValidate()
 	a.board.setCurPawn(0)
 	setRandSeed()
-	a.dice.roll()
+	a.Dice.Roll()
 
 	a.render()
 	a.startBlinkCurPawn()
@@ -181,22 +171,32 @@ mainloop:
 	}
 }
 
-func StartGameOffline(players []PlayerData) {
+func StartGameOffline(players []gameUtils.PlayerData) {
 	participantsCount := 0
 	for _, p := range players {
 		if p.Type != "-" {
 			participantsCount++
 		}
 	}
-	a := arena{
+
+	gameDice := gameUtils.Dice{}
+	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
+
+	a := Arena{
 		participantsCount: participantsCount,
 		board:             ludoBoard{},
 		players:           players,
 		blinkCh:           make(chan bool),
 		nextWinningPos:    0,
+		Dice:              gameDice,
 		bots:              make(map[int][4]int),
+		kChan:             kChan,
 	}
 	a.board.setupBoard(players)
 	a.botsInit()
 	a.runGameLoop()
+}
+
+func StartGameOnline() {
+	network.Join()
 }

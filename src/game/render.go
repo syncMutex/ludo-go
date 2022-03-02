@@ -6,7 +6,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func (a *arena) render() {
+func (a *Arena) render() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	a.board.render()
 	a.renderBottomSection()
@@ -65,11 +65,11 @@ func (b *ludoBoard) renderPawns() {
 	}
 }
 
-func (a *arena) renderBottomSection() {
+func (a *Arena) renderBottomSection() {
 	x, y := 10, 22
 	renderWhoseTurn(a.players[a.curTurn].Color, x, y)
 	renderText(x+2, y, "'s turn", termbox.ColorDefault)
-	renderText(x+20, y, "dice: "+strconv.Itoa(a.dice.value), termbox.ColorDefault)
+	renderText(x+20, y, "Dice: "+strconv.Itoa(a.Dice.Value), termbox.ColorDefault)
 }
 
 func renderWhoseTurn(bg termbox.Attribute, x, y int) {
@@ -84,7 +84,7 @@ func renderText(x, y int, text string, textColor termbox.Attribute) {
 	}
 }
 
-func (a *arena) renderGameOver() {
+func (a *Arena) renderGameOver() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	leaderBoard := make([]termbox.Attribute, a.participantsCount)
 	for _, p := range a.board.players {

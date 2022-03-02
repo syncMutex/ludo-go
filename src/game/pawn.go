@@ -49,7 +49,7 @@ func (b *ludoBoard) setNextCurPawn(curTurn, mag int) {
 	}
 }
 
-func (a *arena) repaintCurPawn() {
+func (a *Arena) repaintCurPawn() {
 	curCell := a.curPawn()["curNode"].cell
 	setBg(curCell.x, curCell.y, a.board.players[a.curTurn].color)
 }

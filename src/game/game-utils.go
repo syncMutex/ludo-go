@@ -6,19 +6,19 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func (a *arena) curPawn() pawn {
+func (a *Arena) curPawn() pawn {
 	return a.curPlayer().pawns[a.board.curPawnIdx]
 }
 
-func (a *arena) curPlayer() player {
+func (a *Arena) curPlayer() player {
 	return a.board.players[a.curTurn]
 }
 
-func (a *arena) makeMove() (hasDestroyed bool, hasReachedDest bool) {
+func (a *Arena) makeMove() (hasDestroyed bool, hasReachedDest bool) {
 	curPlayerColor := a.curPlayer().color
 	curPawn := a.curPawn()
 
-	for i := 0; i < a.dice.value; i++ {
+	for i := 0; i < a.Dice.Value; i++ {
 		curPawn["curNode"].cell.bg = termbox.ColorDefault
 
 		if toDest := curPawn["curNode"].next["toDest"]; toDest != nil && toDest.cell.fg == curPlayerColor {
@@ -44,7 +44,7 @@ func (p pawn) moveToNext(pathName string, bg termbox.Attribute) {
 	p["curNode"].cell.bg = bg
 }
 
-func (a *arena) checkDestroy() (hasDestroyed bool) {
+func (a *Arena) checkDestroy() (hasDestroyed bool) {
 	curCell := a.curPawn()["curNode"].cell
 
 	for i, p := range a.board.players {
@@ -76,6 +76,6 @@ func (p player) isAllPawnsAtDest() bool {
 	return true
 }
 
-func (a *arena) isGameOver() bool {
+func (a *Arena) isGameOver() bool {
 	return a.nextWinningPos >= a.participantsCount-1
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func (a *arena) blinkCurPawn(stopBlink <-chan bool) {
+func (a *Arena) blinkCurPawn(stopBlink <-chan bool) {
 	prevColor := termbox.ColorDefault
 	curCell := a.curPawn()["curNode"].cell
 
@@ -34,12 +34,12 @@ blinkloop:
 	}
 }
 
-func (a *arena) startBlinkCurPawn() {
+func (a *Arena) startBlinkCurPawn() {
 	a.isBlinkChOpen = true
 	go a.blinkCurPawn(a.blinkCh)
 }
 
-func (a *arena) stopBlinkCurPawn() {
+func (a *Arena) stopBlinkCurPawn() {
 	if a.isBlinkChOpen {
 		a.blinkCh <- true
 		a.isBlinkChOpen = false

@@ -54,8 +54,3 @@ func (m *menuPagesType) handleOptSelect() (bool, callback) {
 	}
 	return false, nil
 }
-
-func (m *menuPagesType) changeMenuPage(pageIdx int) {
-	m.curIdx = pageIdx
-	m.menus[m.curIdx].curIdx = 0
-}
