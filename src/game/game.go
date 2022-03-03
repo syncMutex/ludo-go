@@ -1,6 +1,8 @@
 package game
 
 import (
+	"encoding/gob"
+	"fmt"
 	gameUtils "ludo/src/game-utils"
 	"ludo/src/keyboard"
 	"ludo/src/network"
@@ -197,6 +199,26 @@ func StartGameOffline(players []gameUtils.PlayerData) {
 	a.runGameLoop()
 }
 
-func StartGameOnline() {
-	network.Join()
+func StartGameOnline() int {
+	conn, err := network.Join()
+	fmt.Println("joining")
+
+	if err != nil {
+		termbox.Close()
+		return -1
+	}
+
+	dec := gob.NewDecoder(conn)
+
+	var res gameUtils.ConnRes
+
+	dec.Decode(&res)
+
+	fmt.Println(res)
+
+	for {
+
+	}
+
+	return 0
 }

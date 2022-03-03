@@ -1,5 +1,7 @@
 package menu
 
+import "github.com/nsf/termbox-go"
+
 type pos struct {
 	x, y int
 }
@@ -31,6 +33,13 @@ func InitMenu() {
 	}
 	menuPages.renderMenu()
 	if callback := menuPages.keyboardLoop(); callback != nil {
-		callback()
+		exitCode := callback()
+		switch exitCode {
+		case 0:
+			return
+		case -1:
+			termbox.Init()
+			InitMenu()
+		}
 	}
 }

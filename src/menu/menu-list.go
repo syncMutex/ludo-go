@@ -8,6 +8,8 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+type callback func() int
+
 var (
 	mainMenu = menu{
 		opts: []opt{
@@ -67,8 +69,8 @@ var (
 			{
 				label: "Join",
 				onSelect: func(mpt *menuPagesType) (bool, callback) {
-					return false, func() {
-						game.StartGameOnline()
+					return true, func() int {
+						return game.StartGameOnline()
 					}
 				},
 			},
@@ -111,11 +113,11 @@ var (
 						players = append(players, gameUtils.PlayerData{Color: opt.label.(termbox.Attribute), Type: opt.subOpts[opt.curIdx]})
 					}
 
-					return true, func() {
+					return true, func() int {
 						termbox.Close()
 						termbox.Init()
 						go network.Host(players)
-						game.StartGameOnline()
+						return game.StartGameOnline()
 					}
 				},
 			},
@@ -157,10 +159,11 @@ var (
 					for _, opt := range curMenuOpts {
 						players = append(players, gameUtils.PlayerData{Color: opt.label.(termbox.Attribute), Type: opt.subOpts[opt.curIdx]})
 					}
-					return true, func() {
+					return true, func() int {
 						termbox.Close()
 						termbox.Init()
 						game.StartGameOffline(players)
+						return 0
 					}
 				},
 			},

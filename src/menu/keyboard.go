@@ -6,8 +6,6 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-type callback func()
-
 func (m *menuPagesType) keyboardLoop() callback {
 	kb := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 	go keyboard.ListenToKeyboard(&kb)

@@ -1,6 +1,7 @@
 package network
 
 import (
+	"encoding/gob"
 	gameUtils "ludo/src/game-utils"
 	"net"
 )
@@ -19,25 +20,18 @@ type ServerArena struct {
 	bots              map[int][4]int
 }
 
-type Server struct {
-	arena ServerArena
-}
+func handleClient(conn net.Conn, server ServerArena) {
+	enc := gob.NewEncoder(conn)
+	//	dec := gob.NewDecoder(conn)
 
-func handleClient(conn net.Conn) {
-	for {
-
-	}
+	enc.Encode(gameUtils.ConnRes{Ok: true, Msg: "Connected successfully."})
 }
 
 func listenRequests(server ServerArena) {
+	ln, _ := net.Listen("tcp", ":8080")
 	for {
-		ln, _ := net.Listen("tcp", ":8080")
 		conn, _ := ln.Accept()
-
-		if server.participantsCount < 4 {
-			conn.Write([]byte("Waiting for other players..."))
-		}
-		go handleClient(conn)
+		go handleClient(conn, server)
 	}
 }
 
