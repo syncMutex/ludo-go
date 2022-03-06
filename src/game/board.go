@@ -1,7 +1,7 @@
 package game
 
 import (
-	gameUtils "ludo/src/game-utils"
+	"ludo/src/common"
 
 	"github.com/nsf/termbox-go"
 )
@@ -59,7 +59,7 @@ func boardLayerCellMap(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, players
 	return cm
 }
 
-func (board *ludoBoard) setupBoard(players []gameUtils.PlayerData) {
+func (board *ludoBoard) setupBoard(players []common.PlayerData) {
 	boardPos := pos{5, 2}
 	lx, rx, ty, by := boardPos.x+2, boardPos.x+27, boardPos.y+1, boardPos.y+13
 

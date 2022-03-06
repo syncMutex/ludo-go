@@ -1,19 +1,19 @@
 package network
 
 import (
-	"encoding/gob"
-	gameUtils "ludo/src/game-utils"
+	"ludo/src/common"
 	"net"
+	"time"
 )
 
 type Player struct {
-	gameUtils.PlayerData
+	common.PlayerData
 	conn net.Conn
 }
 
 type ServerArena struct {
 	players           []Player
-	dice              gameUtils.Dice
+	dice              common.Dice
 	curTurn           int
 	nextWinningPos    int
 	participantsCount int
@@ -21,10 +21,15 @@ type ServerArena struct {
 }
 
 func handleClient(conn net.Conn, server ServerArena) {
-	enc := gob.NewEncoder(conn)
-	//	dec := gob.NewDecoder(conn)
+	defer conn.Close()
+	gh := common.NewGobHandler(conn)
 
-	enc.Encode(gameUtils.ConnRes{Ok: true, Msg: "Connected successfully."})
+	for {
+		time.Sleep(time.Second)
+		toSend := common.ConnRes{Ok: true, Msg: "Connected successfully."}
+		gh.SendResponse(common.CONN_RES, toSend)
+		gh.SendResponse(common.TEST_RES, common.TestRes{"HE HE HE HAW"})
+	}
 }
 
 func listenRequests(server ServerArena) {
@@ -35,7 +40,7 @@ func listenRequests(server ServerArena) {
 	}
 }
 
-func Host(players []gameUtils.PlayerData) {
+func Host(players []common.PlayerData) {
 	server := ServerArena{}
 	listenRequests(server)
 }

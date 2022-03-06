@@ -1,8 +1,8 @@
 package menu
 
 import (
+	"ludo/src/common"
 	"ludo/src/game"
-	gameUtils "ludo/src/game-utils"
 	"ludo/src/network"
 
 	"github.com/nsf/termbox-go"
@@ -105,12 +105,12 @@ var (
 			{
 				label: "Done",
 				onSelect: func(mpt *menuPagesType) (bool, callback) {
-					players := []gameUtils.PlayerData{}
+					players := []common.PlayerData{}
 					curMenuOpts := mpt.menus[mpt.curIdx].opts
 					curMenuOpts = curMenuOpts[:len(curMenuOpts)-2]
 
 					for _, opt := range curMenuOpts {
-						players = append(players, gameUtils.PlayerData{Color: opt.label.(termbox.Attribute), Type: opt.subOpts[opt.curIdx]})
+						players = append(players, common.PlayerData{Color: opt.label.(termbox.Attribute), Type: opt.subOpts[opt.curIdx]})
 					}
 
 					return true, func() int {
@@ -152,12 +152,12 @@ var (
 			{
 				label: "Done",
 				onSelect: func(mpt *menuPagesType) (bool, callback) {
-					players := []gameUtils.PlayerData{}
+					players := []common.PlayerData{}
 					curMenuOpts := mpt.menus[mpt.curIdx].opts
 					curMenuOpts = curMenuOpts[:len(curMenuOpts)-2]
 
 					for _, opt := range curMenuOpts {
-						players = append(players, gameUtils.PlayerData{Color: opt.label.(termbox.Attribute), Type: opt.subOpts[opt.curIdx]})
+						players = append(players, common.PlayerData{Color: opt.label.(termbox.Attribute), Type: opt.subOpts[opt.curIdx]})
 					}
 					return true, func() int {
 						termbox.Close()

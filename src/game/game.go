@@ -1,9 +1,8 @@
 package game
 
 import (
-	"encoding/gob"
 	"fmt"
-	gameUtils "ludo/src/game-utils"
+	"ludo/src/common"
 	"ludo/src/keyboard"
 	"ludo/src/network"
 	"math/rand"
@@ -13,8 +12,8 @@ import (
 )
 
 type Arena struct {
-	players           []gameUtils.PlayerData
-	Dice              gameUtils.Dice
+	players           []common.PlayerData
+	Dice              common.Dice
 	board             ludoBoard
 	curTurn           int
 	blinkCh           chan bool
@@ -173,7 +172,7 @@ mainloop:
 	}
 }
 
-func StartGameOffline(players []gameUtils.PlayerData) {
+func StartGameOffline(players []common.PlayerData) {
 	participantsCount := 0
 	for _, p := range players {
 		if p.Type != "-" {
@@ -181,7 +180,7 @@ func StartGameOffline(players []gameUtils.PlayerData) {
 		}
 	}
 
-	gameDice := gameUtils.Dice{}
+	gameDice := common.Dice{}
 	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 
 	a := Arena{
@@ -200,23 +199,32 @@ func StartGameOffline(players []gameUtils.PlayerData) {
 }
 
 func StartGameOnline() int {
-	conn, err := network.Join()
-	fmt.Println("joining")
+	gh, err := network.Join()
 
 	if err != nil {
 		termbox.Close()
 		return -1
 	}
 
-	dec := gob.NewDecoder(conn)
-
-	var res gameUtils.ConnRes
-
-	dec.Decode(&res)
-
-	fmt.Println(res)
+	defer gh.Conn.Close()
 
 	for {
+		instruc, err := gh.ReceiveInstruc()
+
+		if err != nil {
+			return -1
+		}
+
+		switch instruc {
+		case common.CONN_RES:
+			var connRes common.ConnRes
+			gh.Decode(&connRes)
+			fmt.Println(connRes)
+		case common.TEST_RES:
+			var connRes common.TestRes
+			gh.Decode(&connRes)
+			fmt.Println(connRes)
+		}
 
 	}
 

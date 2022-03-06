@@ -1,7 +1,7 @@
 package game
 
 import (
-	gameUtils "ludo/src/game-utils"
+	"ludo/src/common"
 
 	"github.com/nsf/termbox-go"
 )
@@ -38,7 +38,7 @@ func createBoardSkeleton(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, playe
 	return cm
 }
 
-func createPawns(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, playersData []gameUtils.PlayerData) [4]player {
+func createPawns(lx, rx, ty, by, boxLen, boxWid int, boardPos pos, playersData []common.PlayerData) [4]player {
 	var players [4]player
 
 	relBoxPos := []pos{
