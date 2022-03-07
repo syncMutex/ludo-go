@@ -55,7 +55,8 @@ var (
 		},
 	}
 
-	playerSubOpts = []string{"Player", "Bot", "-"}
+	offlineSubOpts = []string{"Player", "Bot", "-"}
+	onlineSubOpts  = []string{"Player", "-"}
 
 	onlineMenu = menu{
 		opts: []opt{
@@ -88,19 +89,19 @@ var (
 		opts: []opt{
 			{
 				label:   termbox.ColorBlue,
-				subOpts: playerSubOpts,
+				subOpts: onlineSubOpts,
 			},
 			{
 				label:   termbox.ColorRed,
-				subOpts: playerSubOpts,
+				subOpts: onlineSubOpts,
 			},
 			{
 				label:   termbox.ColorYellow,
-				subOpts: playerSubOpts,
+				subOpts: onlineSubOpts,
 			},
 			{
 				label:   termbox.ColorGreen,
-				subOpts: playerSubOpts,
+				subOpts: onlineSubOpts,
 			},
 			{
 				label: "Done",
@@ -134,20 +135,20 @@ var (
 	offlineMenu = menu{
 		opts: []opt{
 			{
+				label:   termbox.ColorYellow,
+				subOpts: offlineSubOpts,
+			},
+			{
 				label:   termbox.ColorBlue,
-				subOpts: playerSubOpts,
+				subOpts: offlineSubOpts,
 			},
 			{
 				label:   termbox.ColorRed,
-				subOpts: playerSubOpts,
-			},
-			{
-				label:   termbox.ColorYellow,
-				subOpts: playerSubOpts,
+				subOpts: offlineSubOpts,
 			},
 			{
 				label:   termbox.ColorGreen,
-				subOpts: playerSubOpts,
+				subOpts: offlineSubOpts,
 			},
 			{
 				label: "Done",

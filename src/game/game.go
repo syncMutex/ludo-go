@@ -198,7 +198,30 @@ func StartGameOffline(players []common.PlayerData) {
 	a.runGameLoop()
 }
 
+func prompt(s string) (inp string) {
+	kChan := keyboard.KeyboardProps{}
+
+	go keyboard.ListenToKeyboard(&kChan)
+	for {
+		ev := <-kChan.EvChan
+		kChan.Pause()
+		if (ev.Ch >= 'a' && ev.Ch <= 'z') || (ev.Ch >= 'A' && ev.Ch <= 'Z') {
+			inp += string(ev.Ch)
+		}
+		if ev.Key == termbox.KeyBackspace {
+			inp = inp[:len(inp)-1]
+		}
+		if ev.Key == termbox.KeyEnter {
+			break
+		}
+		kChan.Resume()
+	}
+	kChan.Stop()
+	return
+}
+
 func StartGameOnline() int {
+	var players []common.PlayerData
 	gh, err := network.Join()
 
 	if err != nil {
@@ -207,6 +230,8 @@ func StartGameOnline() int {
 	}
 
 	defer gh.Conn.Close()
+
+	playerName := prompt("Your Name: ")
 
 	for {
 		instruc, err := gh.ReceiveInstruc()
@@ -217,13 +242,16 @@ func StartGameOnline() int {
 
 		switch instruc {
 		case common.CONN_RES:
-			var connRes common.ConnRes
-			gh.Decode(&connRes)
-			fmt.Println(connRes)
-		case common.TEST_RES:
-			var connRes common.TestRes
-			gh.Decode(&connRes)
-			fmt.Println(connRes)
+			if gh.GetRes().Ok {
+				gh.Encode(playerName)
+			}
+		case common.PLAYER_DATA:
+			var playerData common.PlayerData
+			gh.Decode(&playerData)
+			fmt.Println(playerData)
+		case common.JOINED_PLAYERS:
+			gh.Decode(&players)
+			fmt.Println(players)
 		}
 
 	}
