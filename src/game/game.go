@@ -1,10 +1,10 @@
 package game
 
 import (
-	"fmt"
 	"ludo/src/common"
 	"ludo/src/keyboard"
 	"ludo/src/network"
+	tbu "ludo/src/termbox-utils"
 	"math/rand"
 	"time"
 
@@ -198,40 +198,32 @@ func StartGameOffline(players []common.PlayerData) {
 	a.runGameLoop()
 }
 
-func prompt(s string) (inp string) {
-	kChan := keyboard.KeyboardProps{}
-
-	go keyboard.ListenToKeyboard(&kChan)
-	for {
-		ev := <-kChan.EvChan
-		kChan.Pause()
-		if (ev.Ch >= 'a' && ev.Ch <= 'z') || (ev.Ch >= 'A' && ev.Ch <= 'Z') {
-			inp += string(ev.Ch)
-		}
-		if ev.Key == termbox.KeyBackspace {
-			inp = inp[:len(inp)-1]
-		}
-		if ev.Key == termbox.KeyEnter {
-			break
-		}
-		kChan.Resume()
+func renderJoinedPlayers(players []common.PlayerData) {
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	x, y := 2, 5
+	renderText(x, y, "Lobby", termbox.ColorBlue)
+	y += 2
+	for _, p := range players {
+		setCell(x, y, ' ', termbox.ColorDefault, p.Color)
+		renderText(x+4, y, p.Name, termbox.ColorDefault)
+		y += 2
 	}
-	kChan.Stop()
-	return
+	termbox.Flush()
 }
 
 func StartGameOnline() int {
 	var players []common.PlayerData
+	var playerData common.PlayerData
+
+	playerData.Name = tbu.PromptText(3, 3, termbox.ColorDefault, "Your Name: ", 15)
+
 	gh, err := network.Join()
 
 	if err != nil {
 		termbox.Close()
 		return -1
 	}
-
 	defer gh.Conn.Close()
-
-	playerName := prompt("Your Name: ")
 
 	for {
 		instruc, err := gh.ReceiveInstruc()
@@ -243,18 +235,13 @@ func StartGameOnline() int {
 		switch instruc {
 		case common.CONN_RES:
 			if gh.GetRes().Ok {
-				gh.Encode(playerName)
+				gh.Encode(playerData.Name)
 			}
-		case common.PLAYER_DATA:
-			var playerData common.PlayerData
-			gh.Decode(&playerData)
-			fmt.Println(playerData)
+		case common.PLAYER_COLOR:
+			gh.Decode(&playerData.Color)
 		case common.JOINED_PLAYERS:
 			gh.Decode(&players)
-			fmt.Println(players)
+			renderJoinedPlayers(players)
 		}
-
 	}
-
-	return 0
 }

@@ -25,7 +25,7 @@ type ServerArena struct {
 	availableColors   []termbox.Attribute
 }
 
-func (s *ServerArena) joinGame(gh *GobHandler) *Player {
+func (s *ServerArena) getNameAndJoinGame(gh *GobHandler) *Player {
 	var playerName string
 	gh.Decode(&playerName)
 
@@ -41,13 +41,19 @@ func (s *ServerArena) joinGame(gh *GobHandler) *Player {
 	return nil
 }
 
-func (s *ServerArena) sendJoinedPlayers(sendResponse func(int, interface{}) error) {
+func (s *ServerArena) updateJoinedPlayers() {
 	joinedPlayers := []common.PlayerData{}
 	for _, p := range s.players {
-		jp := common.PlayerData{Name: p.Name, Color: p.Color}
-		joinedPlayers = append(joinedPlayers, jp)
+		if p.isReserved {
+			jp := common.PlayerData{Name: p.Name, Color: p.Color}
+			joinedPlayers = append(joinedPlayers, jp)
+		}
 	}
-	sendResponse(common.JOINED_PLAYERS, joinedPlayers)
+	for _, p := range s.players {
+		if p.gh != nil {
+			p.gh.SendResponse(common.JOINED_PLAYERS, joinedPlayers)
+		}
+	}
 }
 
 func handleClient(conn net.Conn, server ServerArena) {
@@ -55,19 +61,17 @@ func handleClient(conn net.Conn, server ServerArena) {
 	gh := NewGobHandler(conn)
 
 	gh.SendResponse(common.CONN_RES, common.Res{Ok: true, Msg: "Connected Successfully."})
+	playerInfo := server.getNameAndJoinGame(gh)
+	if playerInfo == nil {
+		gh.SendResponse(common.ERROR, common.Res{Ok: false, Msg: "Game full."})
+		return
+	}
+	gh.SendResponse(common.PLAYER_COLOR, playerInfo.Color)
+	server.updateJoinedPlayers()
 
 	for {
 		instruc, _ := gh.ReceiveInstruc()
 		switch instruc {
-		case common.JOIN_GAME:
-			playerInfo := server.joinGame(gh)
-			if playerInfo == nil {
-				gh.SendResponse(common.ERROR, common.Res{Ok: false, Msg: "Game full."})
-				return
-			}
-			gh.SendResponse(common.PLAYER_DATA, common.PlayerData{Type: playerInfo.Type, Color: playerInfo.Color})
-		case common.JOINED_PLAYERS:
-			server.sendJoinedPlayers(gh.SendResponse)
 		}
 	}
 }
