@@ -25,6 +25,15 @@ type ServerArena struct {
 	availableColors   []termbox.Attribute
 }
 
+func (s ServerArena) isAllReserved() bool {
+	for _, p := range s.players {
+		if !p.isReserved && p.Type == "Player" {
+			return false
+		}
+	}
+	return true
+}
+
 func (s *ServerArena) getNameAndJoinGame(gh *GobHandler) *Player {
 	var playerName string
 	gh.Decode(&playerName)

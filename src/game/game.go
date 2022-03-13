@@ -225,23 +225,32 @@ func StartGameOnline() int {
 	}
 	defer gh.Conn.Close()
 
+	nh := network.NewInstrucLoopHandler(gh.ReceiveInstruc)
+	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
+
+	go nh.RunLoop()
+	go keyboard.ListenToKeyboard(&kChan)
+
 	for {
-		instruc, err := gh.ReceiveInstruc()
-
-		if err != nil {
-			return -1
-		}
-
-		switch instruc {
-		case common.CONN_RES:
-			if gh.GetRes().Ok {
-				gh.Encode(playerData.Name)
+		select {
+		case instruc := <-nh.NetChan:
+			switch instruc {
+			case common.CONN_RES:
+				if gh.GetRes().Ok {
+					gh.Encode(playerData.Name)
+				}
+			case common.PLAYER_COLOR:
+				gh.Decode(&playerData.Color)
+			case common.JOINED_PLAYERS:
+				gh.Decode(&players)
+				renderJoinedPlayers(players)
 			}
-		case common.PLAYER_COLOR:
-			gh.Decode(&playerData.Color)
-		case common.JOINED_PLAYERS:
-			gh.Decode(&players)
-			renderJoinedPlayers(players)
+			nh.Resume()
+		case ev := <-kChan.EvChan:
+			if ev.Key == termbox.KeyEsc {
+				kChan.Stop()
+				return 0
+			}
 		}
 	}
 }
