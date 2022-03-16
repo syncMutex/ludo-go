@@ -2,6 +2,7 @@ package game
 
 import (
 	"ludo/src/keyboard"
+	ll "ludo/src/linked-list"
 	"time"
 
 	"github.com/nsf/termbox-go"
@@ -14,14 +15,14 @@ func (a *Arena) playBot() {
 }
 
 func (a Arena) isEnemyPawnAt(x, y int) bool {
-	for i, p := range a.board.players {
-		if i == a.curTurn || !p.isParticipant() {
+	for i, p := range a.board.Players {
+		if i == a.curTurn || !p.IsParticipant() {
 			continue
 		}
 
-		for _, _pawn := range p.pawns {
-			c := _pawn["curNode"].cell
-			if c.x == x && c.y == y {
+		for _, _pawn := range p.Pawns {
+			c := _pawn["curNode"].Cell
+			if c.X == x && c.Y == y {
 				return true
 			}
 		}
@@ -30,43 +31,43 @@ func (a Arena) isEnemyPawnAt(x, y int) bool {
 	return false
 }
 
-func getPawnAfter(curNode *node, step int) *node {
+func getPawnAfter(curNode *ll.Node, step int) *ll.Node {
 	temp := curNode
 
 	for i := 0; i < step; i++ {
 		if temp == nil {
 			break
 		}
-		temp = temp.next["common"]
+		temp = temp.Next["common"]
 	}
 
 	return temp
 }
 
 func (a *Arena) chooseBestPawn() {
-	temp := a.board.curPawnIdx
+	temp := a.board.CurPawnIdx
 	bestPawn := temp
 	maxMoveProgressed := a.bots[a.curTurn][bestPawn]
 
 	for {
 		n := getPawnAfter(a.curPawn()["curNode"], a.Dice.Value)
-		if n != nil && a.isEnemyPawnAt(n.cell.x, n.cell.y) {
+		if n != nil && a.isEnemyPawnAt(n.Cell.X, n.Cell.Y) {
 			b := a.bots[a.curTurn]
 			b[bestPawn] += a.Dice.Value
 			return
 		}
 		if maxMoveProgressed < a.bots[a.curTurn][temp] {
 			maxMoveProgressed = a.bots[a.curTurn][temp]
-			bestPawn = a.board.curPawnIdx
+			bestPawn = a.board.CurPawnIdx
 		}
 		a.setNextCurPawnAndValidate(1)
-		if a.board.curPawnIdx == temp {
+		if a.board.CurPawnIdx == temp {
 			break
 		}
 	}
 	b := a.bots[a.curTurn]
 	b[bestPawn] += a.Dice.Value
-	a.board.setCurPawn(bestPawn)
+	a.board.SetCurPawn(bestPawn)
 }
 
 func (a *Arena) resetBotPawn(botIdx, pawnIdx int) {
@@ -75,8 +76,8 @@ func (a *Arena) resetBotPawn(botIdx, pawnIdx int) {
 }
 
 func (a *Arena) botsInit() {
-	for idx, p := range a.board.players {
-		if p.isBot() {
+	for idx, p := range a.board.Players {
+		if p.IsBot() {
 			a.bots[idx] = [4]int{}
 		}
 	}

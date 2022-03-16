@@ -24,6 +24,14 @@ func RenderText(text Text) {
 	}
 }
 
+func RenderString(x, y int, text string, textColor termbox.Attribute) {
+	for i := range text {
+		termbox.SetChar(x, y, rune(text[i]))
+		termbox.SetFg(x, y, textColor)
+		x++
+	}
+}
+
 func PromptText(x, y int, fg termbox.Attribute, label string, maxLen int) (inp string) {
 	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 

@@ -3,6 +3,7 @@ package game
 import (
 	"ludo/src/common"
 	"ludo/src/keyboard"
+	board "ludo/src/ludo-board"
 	"ludo/src/network"
 	tbu "ludo/src/termbox-utils"
 	"math/rand"
@@ -14,7 +15,7 @@ import (
 type Arena struct {
 	players           []common.PlayerData
 	Dice              common.Dice
-	board             ludoBoard
+	board             board.LudoBoard
 	curTurn           int
 	blinkCh           chan bool
 	isBlinkChOpen     bool
@@ -32,7 +33,7 @@ func (a *Arena) changePlayerTurn(idx ...int) bool {
 		if a.curTurn >= len(a.players) {
 			a.curTurn = 0
 		}
-		for !a.curPlayer().isParticipant() {
+		for !a.curPlayer().IsParticipant() {
 			a.curTurn++
 			if a.curTurn >= len(a.players) {
 				a.curTurn = 0
@@ -40,12 +41,12 @@ func (a *Arena) changePlayerTurn(idx ...int) bool {
 		}
 	}
 
-	if a.curPlayer().isAllPawnsAtDest() {
+	if a.curPlayer().IsAllPawnsAtDest() {
 		a.changePlayerTurn()
 	}
 
-	a.board.setCurPawn(0)
-	if a.curPawn().isAtDest() || !a.curPawn().hasNPathsAhead(a.Dice.Value) {
+	a.board.SetCurPawn(0)
+	if a.curPawn().IsAtDest() || !a.curPawn().HasNPathsAhead(a.Dice.Value) {
 		return a.setNextCurPawnAndValidate(1)
 	}
 
@@ -53,18 +54,18 @@ func (a *Arena) changePlayerTurn(idx ...int) bool {
 }
 
 func (a *Arena) setNextCurPawnAndValidate(mag int) bool {
-	temp := a.board.curPawnIdx
-	for a.board.setNextCurPawn(a.curTurn, mag); a.curPawn().isAtDest(); {
-		a.board.setNextCurPawn(a.curTurn, mag)
-		if a.board.curPawnIdx == temp {
+	temp := a.board.CurPawnIdx
+	for a.board.SetNextCurPawn(a.curTurn, mag); a.curPawn().IsAtDest(); {
+		a.board.SetNextCurPawn(a.curTurn, mag)
+		if a.board.CurPawnIdx == temp {
 			break
 		}
 	}
 
-	temp = a.board.curPawnIdx
-	for !a.curPawn().hasNPathsAhead(a.Dice.Value) {
-		a.board.setNextCurPawn(a.curTurn, mag)
-		if a.board.curPawnIdx == temp {
+	temp = a.board.CurPawnIdx
+	for !a.curPawn().HasNPathsAhead(a.Dice.Value) {
+		a.board.SetNextCurPawn(a.curTurn, mag)
+		if a.board.CurPawnIdx == temp {
 			return false
 		}
 	}
@@ -73,7 +74,7 @@ func (a *Arena) setNextCurPawnAndValidate(mag int) bool {
 }
 
 func (a *Arena) setCurPlayerWin() {
-	a.board.players[a.curTurn].winningPos = a.nextWinningPos + 1
+	a.board.Players[a.curTurn].WinningPos = a.nextWinningPos + 1
 	a.nextWinningPos++
 }
 
@@ -110,7 +111,7 @@ func (a *Arena) handleKeyboard(k keyboard.KeyboardEvent) bool {
 		if !hasDestroyed && !hasReachedDest {
 			a.changePlayerTurnAndValidate()
 		} else if hasReachedDest {
-			if a.curPlayer().isAllPawnsAtDest() {
+			if a.curPlayer().IsAllPawnsAtDest() {
 				a.setCurPlayerWin()
 				if a.isGameOver() {
 					a.changePlayerTurn()
@@ -141,14 +142,14 @@ func (a *Arena) runGameLoop() {
 	go keyboard.ListenToKeyboard(&kChan)
 	a.changePlayerTurn(1)
 	a.changePlayerTurnAndValidate()
-	a.board.setCurPawn(0)
+	a.board.SetCurPawn(0)
 	setRandSeed()
 	a.Dice.Roll()
 
 	a.render()
 	a.startBlinkCurPawn()
 
-	for a.curPlayer().isBot() {
+	for a.curPlayer().IsBot() {
 		a.playBot()
 		if a.isGameOver() {
 			break
@@ -162,7 +163,7 @@ mainloop:
 			kChan.Stop()
 			break mainloop
 		}
-		for a.curPlayer().isBot() {
+		for a.curPlayer().IsBot() {
 			a.playBot()
 			if a.isGameOver() {
 				break
@@ -185,7 +186,7 @@ func StartGameOffline(players []common.PlayerData) {
 
 	a := Arena{
 		participantsCount: participantsCount,
-		board:             ludoBoard{},
+		board:             board.LudoBoard{},
 		players:           players,
 		blinkCh:           make(chan bool),
 		nextWinningPos:    0,
@@ -193,7 +194,7 @@ func StartGameOffline(players []common.PlayerData) {
 		bots:              make(map[int][4]int),
 		kChan:             kChan,
 	}
-	a.board.setupBoard(players)
+	a.board.SetupBoard(players)
 	a.botsInit()
 	a.runGameLoop()
 }
@@ -201,11 +202,11 @@ func StartGameOffline(players []common.PlayerData) {
 func renderJoinedPlayers(players []common.PlayerData) {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	x, y := 2, 5
-	renderText(x, y, "Lobby", termbox.ColorBlue)
+	tbu.RenderString(x, y, "Lobby", termbox.ColorBlue)
 	y += 2
 	for _, p := range players {
-		setCell(x, y, ' ', termbox.ColorDefault, p.Color)
-		renderText(x+4, y, p.Name, termbox.ColorDefault)
+		tbu.SetCell(x, y, ' ', termbox.ColorDefault, p.Color)
+		tbu.RenderString(x+4, y, p.Name, termbox.ColorDefault)
 		y += 2
 	}
 	termbox.Flush()
