@@ -36,7 +36,7 @@ func PromptText(x, y int, fg termbox.Attribute, label string, maxLen int) (inp s
 	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 
 	go keyboard.ListenToKeyboard(&kChan)
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	Clear()
 	termbox.SetCursor(x+len(label)+len(inp), y)
 	RenderText(Text{x, y, label, fg, termbox.ColorDefault, 0})
 	termbox.Flush()
@@ -56,7 +56,7 @@ func PromptText(x, y int, fg termbox.Attribute, label string, maxLen int) (inp s
 			break
 		}
 
-		termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+		Clear()
 		RenderText(Text{x, y, label, termbox.ColorDefault, termbox.ColorDefault, 0})
 		RenderText(Text{x + len(label), y, inp, fg, termbox.ColorDefault, 0})
 		termbox.Flush()
@@ -65,7 +65,7 @@ func PromptText(x, y int, fg termbox.Attribute, label string, maxLen int) (inp s
 	}
 	kChan.Stop()
 	termbox.HideCursor()
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	Clear()
 	termbox.Flush()
 	return
 }

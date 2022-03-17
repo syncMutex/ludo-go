@@ -33,7 +33,7 @@ func renderSubOpts(op opt, x, y, oidx, menuIdx int) {
 }
 
 func (m *menuPagesType) renderMenu() {
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	tbu.Clear()
 
 	curMenu := m.menus[m.curIdx]
 

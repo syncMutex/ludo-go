@@ -1,8 +1,9 @@
 package common
 
 const (
-	ERROR    = iota - 1
-	CONN_RES = iota
+	UNKNOWN_ERR = iota - 2
+	KNOWN_ERR   = iota - 1
+	CONN_RES    = iota
 	JOINED_PLAYERS
 	PLAYER_COLOR
 )

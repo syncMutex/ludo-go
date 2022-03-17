@@ -15,9 +15,10 @@ type GobHandler struct {
 }
 
 type InstrucLoopHandler struct {
-	NetChan      chan int
-	receiverFunc func() (int, error)
-	IsPaused     *bool
+	NetChan               chan int
+	receiverFunc          func() (int, error)
+	IsRunning             bool
+	processNextInstucChan chan bool
 }
 
 func (h *GobHandler) Encode(i interface{}) error {
@@ -34,7 +35,7 @@ func (h *GobHandler) ReceiveInstruc() (int, error) {
 	err := h.Decode(&instruc)
 
 	if err != nil {
-		return common.ERROR, err
+		return common.UNKNOWN_ERR, err
 	}
 	return instruc, err
 }
@@ -54,29 +55,26 @@ func NewGobHandler(conn net.Conn) *GobHandler {
 }
 
 func NewInstrucLoopHandler(receiverFunc func() (int, error)) *InstrucLoopHandler {
-	isPaused := false
 	return &InstrucLoopHandler{
-		NetChan:      make(chan int),
-		receiverFunc: receiverFunc,
-		IsPaused:     &isPaused,
+		NetChan:               make(chan int),
+		receiverFunc:          receiverFunc,
+		IsRunning:             false,
+		processNextInstucChan: make(chan bool),
 	}
 }
 
-func (n *InstrucLoopHandler) Pause() {
-	*n.IsPaused = true
-}
-
-func (n *InstrucLoopHandler) Resume() {
-	*n.IsPaused = false
+func (n *InstrucLoopHandler) Continue(isContinue bool) {
+	n.processNextInstucChan <- isContinue
 }
 
 func (n *InstrucLoopHandler) RunLoop() {
 	for {
-		if *(n.IsPaused) {
-			continue
-		}
+		n.IsRunning = true
 		instruc, _ := n.receiverFunc()
 		n.NetChan <- instruc
-		n.Pause()
+		n.IsRunning = false
+		if yes := <-n.processNextInstucChan; !yes {
+			return
+		}
 	}
 }

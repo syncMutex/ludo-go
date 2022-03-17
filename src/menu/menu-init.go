@@ -38,7 +38,9 @@ func InitMenu() {
 		case 0:
 			return
 		case -1:
-			termbox.Init()
+			if !termbox.IsInit {
+				termbox.Init()
+			}
 			InitMenu()
 		}
 	}

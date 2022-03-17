@@ -72,7 +72,7 @@ func handleClient(conn net.Conn, server ServerArena) {
 	gh.SendResponse(common.CONN_RES, common.Res{Ok: true, Msg: "Connected Successfully."})
 	playerInfo := server.getNameAndJoinGame(gh)
 	if playerInfo == nil {
-		gh.SendResponse(common.ERROR, common.Res{Ok: false, Msg: "Game full."})
+		gh.SendResponse(common.KNOWN_ERR, common.Res{Ok: false, Msg: "Game full."})
 		return
 	}
 	gh.SendResponse(common.PLAYER_COLOR, playerInfo.Color)

@@ -11,3 +11,7 @@ func SetBg(x, y int, bg termbox.Attribute) {
 	termbox.SetBg(x, y, bg)
 	termbox.SetBg(x+1, y, bg)
 }
+
+func Clear() {
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+}

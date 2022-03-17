@@ -5,12 +5,13 @@ import (
 	"ludo/src/keyboard"
 	"ludo/src/network"
 	tbu "ludo/src/termbox-utils"
+	"time"
 
 	"github.com/nsf/termbox-go"
 )
 
 func renderJoinedPlayers(players []common.PlayerData) {
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	tbu.Clear()
 	x, y := 2, 5
 	tbu.RenderString(x, y, "Lobby", termbox.ColorBlue)
 	y += 2
@@ -55,10 +56,19 @@ func StartGameOnline() int {
 			case common.JOINED_PLAYERS:
 				gh.Decode(&players)
 				renderJoinedPlayers(players)
+			case common.KNOWN_ERR:
+				tbu.Clear()
+				tbu.RenderText(tbu.Text{X: 5, Y: 3, Text: gh.GetRes().Msg, Fg: termbox.ColorRed})
+				termbox.Flush()
+				time.Sleep(time.Second * 3)
+				nh.Continue(false)
+				kChan.Stop()
+				return -1
 			}
-			nh.Resume()
+			nh.Continue(true)
 		case ev := <-kChan.EvChan:
 			if ev.Key == termbox.KeyEsc {
+				nh.Continue(false)
 				kChan.Stop()
 				return 0
 			}

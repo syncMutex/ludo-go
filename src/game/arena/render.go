@@ -9,7 +9,7 @@ import (
 )
 
 func (a *Arena) Render() {
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	tbu.Clear()
 	a.Board.Render()
 	a.RenderBottomSection()
 	termbox.Flush()
@@ -27,7 +27,7 @@ func renderWhoseTurn(bg termbox.Attribute, x, y int) {
 }
 
 func (a *Arena) RenderGameOver() {
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	tbu.Clear()
 	leaderBoard := make([]termbox.Attribute, a.ParticipantsCount)
 	for _, p := range a.Board.Players {
 		if p.IsParticipant() {
