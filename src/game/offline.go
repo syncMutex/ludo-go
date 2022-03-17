@@ -1,0 +1,126 @@
+package game
+
+import (
+	"ludo/src/common"
+	"ludo/src/game/arena"
+	"ludo/src/keyboard"
+	board "ludo/src/ludo-board"
+
+	"math/rand"
+	"time"
+
+	"github.com/nsf/termbox-go"
+)
+
+func setRandSeed() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+func handleKeyboardOffline(a *arena.Arena, k keyboard.KeyboardEvent) bool {
+	if a.IsGameOver() {
+		return k.Key == termbox.KeyEsc
+	}
+
+	a.StopBlinkCurPawn()
+	a.RepaintCurPawn()
+	switch k.Key {
+	case termbox.KeyArrowRight:
+		a.SetNextCurPawnAndValidate(1)
+	case termbox.KeyArrowLeft:
+		a.SetNextCurPawnAndValidate(-1)
+	case termbox.KeyEnter:
+		fallthrough
+	case termbox.KeySpace:
+		hasDestroyed, hasReachedDest := a.MakeMove()
+		a.Dice.Roll()
+		a.Render()
+		if !hasDestroyed && !hasReachedDest {
+			a.ChangePlayerTurnAndValidate()
+		} else if hasReachedDest {
+			if a.CurPlayer().IsAllPawnsAtDest() {
+				a.SetCurPlayerWin()
+				if a.IsGameOver() {
+					a.ChangePlayerTurn()
+					a.SetCurPlayerWin()
+					a.RenderGameOver()
+					return false
+				}
+			}
+			if ok := a.SetNextCurPawnAndValidate(1); !ok {
+				a.ChangePlayerTurnAndValidate()
+			}
+		}
+	case termbox.KeyEsc:
+		return true
+	}
+	a.Render()
+	a.StartBlinkCurPawn()
+	return false
+}
+
+func botFuncOffline(a *arena.Arena) {
+	handleKeyboardOffline(a, keyboard.KeyboardEvent{Key: termbox.KeyEnter, Ch: ' '})
+}
+
+func runGameLoopOffline(a *arena.Arena) {
+	kChan := a.KChan
+
+	go keyboard.ListenToKeyboard(&kChan)
+	a.ChangePlayerTurn(1)
+	a.ChangePlayerTurnAndValidate()
+	a.Board.SetCurPawn(0)
+	setRandSeed()
+	a.Dice.Roll()
+
+	a.Render()
+	a.StartBlinkCurPawn()
+
+	for a.CurPlayer().IsBot() {
+		a.PlayBot(botFuncOffline)
+		if a.IsGameOver() {
+			break
+		}
+	}
+mainloop:
+	for {
+		ev := <-kChan.EvChan
+		kChan.Pause()
+		if stop := handleKeyboardOffline(a, ev); stop {
+			kChan.Stop()
+			break mainloop
+		}
+		for a.CurPlayer().IsBot() {
+			a.PlayBot(botFuncOffline)
+			if a.IsGameOver() {
+				break
+			}
+		}
+		kChan.Resume()
+	}
+}
+
+func StartGameOffline(players []common.PlayerData) {
+	participantsCount := 0
+	for _, p := range players {
+		if p.Type != "-" {
+			participantsCount++
+		}
+	}
+
+	gameDice := common.Dice{}
+	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
+
+	a := arena.Arena{
+		ParticipantsCount: participantsCount,
+		Board:             board.LudoBoard{},
+		Players:           players,
+		BlinkCh:           make(chan bool),
+		NextWinningPos:    0,
+		Dice:              gameDice,
+		Bots:              make(map[int][4]int),
+		KChan:             kChan,
+	}
+	a.Board.SetupBoard(players)
+	a.BotsInit()
+	runGameLoopOffline(&a)
+}

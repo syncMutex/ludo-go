@@ -1,4 +1,4 @@
-package game
+package arena
 
 import (
 	"time"
@@ -8,14 +8,14 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func (a *Arena) blinkCurPawn(stopBlink <-chan bool) {
+func (a *Arena) BlinkCurPawn(stopBlink <-chan bool) {
 	prevColor := termbox.ColorDefault
-	curCell := a.curPawn()["curNode"].Cell
+	curCell := a.CurPawn()["curNode"].Cell
 
 	toggleBg := func() {
 		if prevColor == termbox.ColorDefault {
-			tbu.SetBg(curCell.X, curCell.Y, a.board.Players[a.curTurn].Color)
-			prevColor = a.board.Players[a.curTurn].Color
+			tbu.SetBg(curCell.X, curCell.Y, a.Board.Players[a.CurTurn].Color)
+			prevColor = a.Board.Players[a.CurTurn].Color
 		} else {
 			tbu.SetBg(curCell.X, curCell.Y, termbox.ColorDefault)
 			prevColor = termbox.ColorDefault
@@ -36,14 +36,14 @@ blinkloop:
 	}
 }
 
-func (a *Arena) startBlinkCurPawn() {
-	a.isBlinkChOpen = true
-	go a.blinkCurPawn(a.blinkCh)
+func (a *Arena) StartBlinkCurPawn() {
+	a.IsBlinkChOpen = true
+	go a.BlinkCurPawn(a.BlinkCh)
 }
 
-func (a *Arena) stopBlinkCurPawn() {
-	if a.isBlinkChOpen {
-		a.blinkCh <- true
-		a.isBlinkChOpen = false
+func (a *Arena) StopBlinkCurPawn() {
+	if a.IsBlinkChOpen {
+		a.BlinkCh <- true
+		a.IsBlinkChOpen = false
 	}
 }

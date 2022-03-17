@@ -1,4 +1,4 @@
-package game
+package arena
 
 import (
 	board "ludo/src/ludo-board"
@@ -8,17 +8,17 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func (a *Arena) curPawn() board.Pawn {
-	return a.curPlayer().Pawns[a.board.CurPawnIdx]
+func (a *Arena) CurPawn() board.Pawn {
+	return a.CurPlayer().Pawns[a.Board.CurPawnIdx]
 }
 
-func (a *Arena) curPlayer() board.Player {
-	return a.board.Players[a.curTurn]
+func (a *Arena) CurPlayer() board.Player {
+	return a.Board.Players[a.CurTurn]
 }
 
-func (a *Arena) makeMove() (hasDestroyed bool, hasReachedDest bool) {
-	curPlayerColor := a.curPlayer().Color
-	curPawn := a.curPawn()
+func (a *Arena) MakeMove() (hasDestroyed bool, hasReachedDest bool) {
+	curPlayerColor := a.CurPlayer().Color
+	curPawn := a.CurPawn()
 
 	for i := 0; i < a.Dice.Value; i++ {
 		curPawn["curNode"].Cell.Bg = termbox.ColorDefault
@@ -30,22 +30,22 @@ func (a *Arena) makeMove() (hasDestroyed bool, hasReachedDest bool) {
 		} else {
 			break
 		}
-		a.render()
+		a.Render()
 		time.Sleep(time.Millisecond * 0)
 	}
 
 	hasDestroyed = a.checkDestroy()
 	hasReachedDest = curPawn.IsAtDest()
-	a.render()
+	a.Render()
 
 	return
 }
 
 func (a *Arena) checkDestroy() (hasDestroyed bool) {
-	curCell := a.curPawn()["curNode"].Cell
+	curCell := a.CurPawn()["curNode"].Cell
 
-	for i, p := range a.board.Players {
-		if i == a.curTurn || !p.IsParticipant() {
+	for i, p := range a.Board.Players {
+		if i == a.CurTurn || !p.IsParticipant() {
 			continue
 		}
 
@@ -53,8 +53,8 @@ func (a *Arena) checkDestroy() (hasDestroyed bool) {
 			c := _pawn["curNode"].Cell
 			if c.X == curCell.X && c.Y == curCell.Y {
 				hasDestroyed = true
-				if a.curPlayer().IsBot() {
-					a.resetBotPawn(i, j)
+				if a.CurPlayer().IsBot() {
+					a.ResetBotPawn(i, j)
 				}
 				_pawn["curNode"] = _pawn["homeNode"]
 			}
@@ -64,11 +64,11 @@ func (a *Arena) checkDestroy() (hasDestroyed bool) {
 	return
 }
 
-func (a *Arena) isGameOver() bool {
-	return a.nextWinningPos >= a.participantsCount-1
+func (a *Arena) IsGameOver() bool {
+	return a.NextWinningPos >= a.ParticipantsCount-1
 }
 
-func (a *Arena) repaintCurPawn() {
-	curCell := a.curPawn()["curNode"].Cell
-	tbu.SetBg(curCell.X, curCell.Y, a.board.Players[a.curTurn].Color)
+func (a *Arena) RepaintCurPawn() {
+	curCell := a.CurPawn()["curNode"].Cell
+	tbu.SetBg(curCell.X, curCell.Y, a.Board.Players[a.CurTurn].Color)
 }

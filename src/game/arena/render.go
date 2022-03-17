@@ -1,4 +1,4 @@
-package game
+package arena
 
 import (
 	"strconv"
@@ -8,16 +8,16 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func (a *Arena) render() {
+func (a *Arena) Render() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	a.board.Render()
-	a.renderBottomSection()
+	a.Board.Render()
+	a.RenderBottomSection()
 	termbox.Flush()
 }
 
-func (a *Arena) renderBottomSection() {
+func (a *Arena) RenderBottomSection() {
 	x, y := 10, 22
-	renderWhoseTurn(a.players[a.curTurn].Color, x, y)
+	renderWhoseTurn(a.Players[a.CurTurn].Color, x, y)
 	tbu.RenderString(x+2, y, "'s turn", termbox.ColorDefault)
 	tbu.RenderString(x+20, y, "Dice: "+strconv.Itoa(a.Dice.Value), termbox.ColorDefault)
 }
@@ -26,10 +26,10 @@ func renderWhoseTurn(bg termbox.Attribute, x, y int) {
 	tbu.SetCell(x, y, ' ', termbox.ColorDefault, bg)
 }
 
-func (a *Arena) renderGameOver() {
+func (a *Arena) RenderGameOver() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	leaderBoard := make([]termbox.Attribute, a.participantsCount)
-	for _, p := range a.board.Players {
+	leaderBoard := make([]termbox.Attribute, a.ParticipantsCount)
+	for _, p := range a.Board.Players {
 		if p.IsParticipant() {
 			leaderBoard[p.WinningPos-1] = p.Color
 		}
