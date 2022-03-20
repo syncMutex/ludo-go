@@ -6,6 +6,7 @@ const (
 	CONN_RES    = iota
 	JOINED_PLAYERS
 	PLAYER_COLOR
+	START_GAME
 )
 
 type Res struct {

@@ -19,7 +19,18 @@ type Arena struct {
 	NextWinningPos    int
 	ParticipantsCount int
 	Bots              map[int][4]int
-	KChan             keyboard.KeyboardProps
+	KChan             *keyboard.KeyboardProps
+}
+
+func (a *Arena) SetupBoard() {
+	participantsCount := 0
+	for _, p := range a.Players {
+		if p.Type != "-" {
+			participantsCount++
+		}
+	}
+	a.ParticipantsCount = participantsCount
+	a.Board.SetupBoard(a.Players)
 }
 
 func (a *Arena) SetCurPlayerAndPawn(color termbox.Attribute, pidx int) {

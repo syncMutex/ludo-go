@@ -6,15 +6,8 @@ import (
 	"ludo/src/keyboard"
 	board "ludo/src/ludo-board"
 
-	"math/rand"
-	"time"
-
 	"github.com/nsf/termbox-go"
 )
-
-func setRandSeed() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 func handleKeyboardOffline(a *arena.Arena, k keyboard.KeyboardEvent) bool {
 	if a.IsGameOver() {
@@ -65,11 +58,11 @@ func botFuncOffline(a *arena.Arena) {
 func runGameLoopOffline(a *arena.Arena) {
 	kChan := a.KChan
 
-	go keyboard.ListenToKeyboard(&kChan)
+	go keyboard.ListenToKeyboard(kChan)
 	a.ChangePlayerTurn(1)
 	a.ChangePlayerTurnAndValidate()
 	a.Board.SetCurPawn(0)
-	setRandSeed()
+	common.SetRandSeed()
 	a.Dice.Roll()
 
 	a.Render()
@@ -100,25 +93,18 @@ mainloop:
 }
 
 func StartGameOffline(players []common.PlayerData) {
-	participantsCount := 0
-	for _, p := range players {
-		if p.Type != "-" {
-			participantsCount++
-		}
-	}
 
 	gameDice := common.Dice{}
 	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 
 	a := arena.Arena{
-		ParticipantsCount: participantsCount,
-		Board:             board.LudoBoard{},
-		Players:           players,
-		BlinkCh:           make(chan bool),
-		NextWinningPos:    0,
-		Dice:              gameDice,
-		Bots:              make(map[int][4]int),
-		KChan:             kChan,
+		Board:          board.LudoBoard{},
+		Players:        players,
+		BlinkCh:        make(chan bool),
+		NextWinningPos: 0,
+		Dice:           gameDice,
+		Bots:           make(map[int][4]int),
+		KChan:          &kChan,
 	}
 	a.Board.SetupBoard(players)
 	a.BotsInit()

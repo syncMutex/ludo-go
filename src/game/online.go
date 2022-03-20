@@ -2,6 +2,7 @@ package game
 
 import (
 	"ludo/src/common"
+	"ludo/src/game/arena"
 	"ludo/src/keyboard"
 	"ludo/src/network"
 	tbu "ludo/src/termbox-utils"
@@ -35,13 +36,16 @@ func StartGameOnline() int {
 		termbox.Close()
 		return -1
 	}
-	defer gh.Conn.Close()
 
 	nh := network.NewInstrucLoopHandler(gh.ReceiveInstruc)
 	kChan := keyboard.KeyboardProps{EvChan: make(chan keyboard.KeyboardEvent)}
 
 	go nh.RunLoop()
 	go keyboard.ListenToKeyboard(&kChan)
+
+	defer func() {
+		gh.Conn.Close()
+	}()
 
 	for {
 		select {
@@ -56,13 +60,16 @@ func StartGameOnline() int {
 			case common.JOINED_PLAYERS:
 				gh.Decode(&players)
 				renderJoinedPlayers(players)
+			case common.START_GAME:
+				var a arena.Arena
+				gh.Decode(&a)
+				a.SetupBoard()
+				a.Render()
 			case common.KNOWN_ERR:
 				tbu.Clear()
 				tbu.RenderText(tbu.Text{X: 5, Y: 3, Text: gh.GetRes().Msg, Fg: termbox.ColorRed})
 				termbox.Flush()
 				time.Sleep(time.Second * 3)
-				nh.Continue(false)
-				kChan.Stop()
 				return -1
 			}
 			nh.Continue(true)

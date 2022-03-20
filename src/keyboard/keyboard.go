@@ -12,7 +12,7 @@ type KeyboardEvent struct {
 type KeyboardProps struct {
 	EvChan   chan KeyboardEvent
 	stopSig  chan bool
-	isPaused bool
+	IsPaused bool
 }
 
 func (k *KeyboardProps) Stop() {
@@ -21,11 +21,11 @@ func (k *KeyboardProps) Stop() {
 }
 
 func (k *KeyboardProps) Pause() {
-	k.isPaused = true
+	k.IsPaused = true
 }
 
 func (k *KeyboardProps) Resume() {
-	k.isPaused = false
+	k.IsPaused = false
 }
 
 func ListenToKeyboard(kbChans *KeyboardProps) {
@@ -43,7 +43,7 @@ keyboardLoop:
 		default:
 			switch ev := termbox.PollEvent(); ev.Type {
 			case termbox.EventKey:
-				if kbChans.isPaused {
+				if kbChans.IsPaused {
 					break
 				}
 				kbChans.EvChan <- KeyboardEvent{ev.Key, ev.Ch}

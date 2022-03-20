@@ -2,70 +2,13 @@ package network
 
 import (
 	"ludo/src/common"
+	"ludo/src/game/arena"
+	board "ludo/src/ludo-board"
 	"net"
 	"strconv"
-
-	"github.com/nsf/termbox-go"
 )
 
-type Player struct {
-	common.PlayerData
-	isConnected bool
-	isReserved  bool
-	gh          *GobHandler
-}
-
-type ServerArena struct {
-	players           []Player
-	dice              common.Dice
-	curTurn           int
-	nextWinningPos    int
-	participantsCount int
-	bots              map[int][4]int
-	availableColors   []termbox.Attribute
-}
-
-func (s ServerArena) isAllReserved() bool {
-	for _, p := range s.players {
-		if !p.isReserved && p.Type == "Player" {
-			return false
-		}
-	}
-	return true
-}
-
-func (s *ServerArena) getNameAndJoinGame(gh *GobHandler) *Player {
-	var playerName string
-	gh.Decode(&playerName)
-
-	for i := range s.players {
-		p := &s.players[i]
-		if !p.isReserved && p.Type == "Player" {
-			p.gh = gh
-			p.Name = playerName
-			p.isReserved = true
-			return p
-		}
-	}
-	return nil
-}
-
-func (s *ServerArena) updateJoinedPlayers() {
-	joinedPlayers := []common.PlayerData{}
-	for _, p := range s.players {
-		if p.isReserved {
-			jp := common.PlayerData{Name: p.Name, Color: p.Color}
-			joinedPlayers = append(joinedPlayers, jp)
-		}
-	}
-	for _, p := range s.players {
-		if p.gh != nil {
-			p.gh.SendResponse(common.JOINED_PLAYERS, joinedPlayers)
-		}
-	}
-}
-
-func handleClient(conn net.Conn, server ServerArena) {
+func handleClient(conn net.Conn, server Server) {
 	defer conn.Close()
 	gh := NewGobHandler(conn)
 
@@ -78,6 +21,10 @@ func handleClient(conn net.Conn, server ServerArena) {
 	gh.SendResponse(common.PLAYER_COLOR, playerInfo.Color)
 	server.updateJoinedPlayers()
 
+	if server.isAllReserved() {
+		server.broadcastResponse(common.START_GAME, server.arena)
+	}
+
 	for {
 		instruc, _ := gh.ReceiveInstruc()
 		switch instruc {
@@ -85,7 +32,7 @@ func handleClient(conn net.Conn, server ServerArena) {
 	}
 }
 
-func listenRequests(server ServerArena) {
+func listenRequests(server Server) {
 	ln, _ := net.Listen("tcp", ":8080")
 	for {
 		conn, _ := ln.Accept()
@@ -105,6 +52,20 @@ func Host(players []common.PlayerData) {
 		playersList = append(playersList, pl)
 	}
 
-	server := ServerArena{players: playersList}
+	common.SetRandSeed()
+	gameDice := common.Dice{}
+	gameDice.Roll()
+
+	server := Server{
+		players: playersList,
+		arena: arena.Arena{
+			Board:          board.LudoBoard{},
+			Players:        players,
+			NextWinningPos: 0,
+			Dice:           gameDice,
+			Bots:           make(map[int][4]int),
+			KChan:          nil,
+		},
+	}
 	listenRequests(server)
 }

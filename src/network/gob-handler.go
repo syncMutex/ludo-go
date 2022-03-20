@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"ludo/src/common"
 	"net"
+	"sync"
 )
 
 type GobHandler struct {
@@ -40,9 +41,25 @@ func (h *GobHandler) ReceiveInstruc() (int, error) {
 	return instruc, err
 }
 
-func (h *GobHandler) SendResponse(instruc int, data interface{}) error {
+func (h *GobHandler) SendInstruc(instruc int, data interface{}, wg ...*sync.WaitGroup) error {
+	err := h.Encode(instruc)
+
+	if len(wg) != 0 && wg[0] != nil {
+		wg[0].Done()
+		return nil
+	}
+	return err
+}
+
+func (h *GobHandler) SendResponse(instruc int, data interface{}, wg ...*sync.WaitGroup) error {
 	h.Encode(instruc)
-	return h.Encode(data)
+	err := h.Encode(data)
+
+	if len(wg) != 0 && wg[0] != nil {
+		wg[0].Done()
+		return nil
+	}
+	return err
 }
 
 func (h *GobHandler) GetRes() (res common.Res) {
