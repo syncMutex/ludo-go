@@ -3,6 +3,7 @@ package network
 import (
 	"ludo/src/common"
 	"ludo/src/game/arena"
+	"ludo/src/network/schema"
 )
 
 type Player struct {
@@ -27,8 +28,7 @@ func (s Server) isAllReserved() bool {
 }
 
 func (s *Server) getNameAndJoinGame(gh *GobHandler) *Player {
-	var playerName string
-	gh.Decode(&playerName)
+	playerName := DecodeData[string](gh)
 
 	for i := range s.players {
 		p := &s.players[i]
@@ -50,10 +50,10 @@ func (s *Server) updateJoinedPlayers() {
 			joinedPlayers = append(joinedPlayers, jp)
 		}
 	}
-	s.broadcastResponse(common.JOINED_PLAYERS, joinedPlayers)
+	s.broadcastResponse(schema.JOINED_PLAYERS, joinedPlayers)
 }
 
-func (s *Server) boardState() (brdSt common.BoardState) {
+func (s *Server) boardState() (brdSt schema.BoardState) {
 	brdSt.CurTurn = s.arena.CurPlayer().Color
 	brdSt.DiceValue = s.arena.Dice.Value
 	return
@@ -62,6 +62,6 @@ func (s *Server) boardState() (brdSt common.BoardState) {
 func (s *Server) setupBoard() {
 	s.arena.SetupBoard()
 	s.arena.CurTurn = 1
-	s.arena.ChangePlayerTurnAndValidate()
+	s.arena.ChangePlayerTurnAndValidate(DONT_RENDER)
 	s.arena.Board.SetCurPawn(0)
 }

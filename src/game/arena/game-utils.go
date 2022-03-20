@@ -16,7 +16,7 @@ func (a *Arena) CurPlayer() board.Player {
 	return a.Board.Players[a.CurTurn]
 }
 
-func (a *Arena) MakeMove() (hasDestroyed bool, hasReachedDest bool) {
+func (a *Arena) MakeMove(sleepTime time.Duration, doRender bool) (hasDestroyed bool, hasReachedDest bool) {
 	curPlayerColor := a.CurPlayer().Color
 	curPawn := a.CurPawn()
 
@@ -30,13 +30,18 @@ func (a *Arena) MakeMove() (hasDestroyed bool, hasReachedDest bool) {
 		} else {
 			break
 		}
-		a.Render()
-		time.Sleep(time.Millisecond * 0)
+		if doRender {
+			a.Render()
+		}
+		time.Sleep(sleepTime)
 	}
 
 	hasDestroyed = a.checkDestroy()
 	hasReachedDest = curPawn.IsAtDest()
-	a.Render()
+
+	if doRender {
+		a.Render()
+	}
 
 	return
 }

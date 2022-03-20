@@ -5,9 +5,12 @@ import (
 	"ludo/src/game/arena"
 	"ludo/src/keyboard"
 	board "ludo/src/ludo-board"
+	"time"
 
 	"github.com/nsf/termbox-go"
 )
+
+const DO_RENDER = true
 
 func handleKeyboardOffline(a *arena.Arena, k keyboard.KeyboardEvent) bool {
 	if a.IsGameOver() {
@@ -24,11 +27,11 @@ func handleKeyboardOffline(a *arena.Arena, k keyboard.KeyboardEvent) bool {
 	case termbox.KeyEnter:
 		fallthrough
 	case termbox.KeySpace:
-		hasDestroyed, hasReachedDest := a.MakeMove()
+		hasDestroyed, hasReachedDest := a.MakeMove(time.Millisecond*0, true)
 		a.Dice.Roll()
 		a.Render()
 		if !hasDestroyed && !hasReachedDest {
-			a.ChangePlayerTurnAndValidate()
+			a.ChangePlayerTurnAndValidate(DO_RENDER)
 		} else if hasReachedDest {
 			if a.CurPlayer().IsAllPawnsAtDest() {
 				a.SetCurPlayerWin()
@@ -40,7 +43,7 @@ func handleKeyboardOffline(a *arena.Arena, k keyboard.KeyboardEvent) bool {
 				}
 			}
 			if ok := a.SetNextCurPawnAndValidate(1); !ok {
-				a.ChangePlayerTurnAndValidate()
+				a.ChangePlayerTurnAndValidate(DO_RENDER)
 			}
 		}
 	case termbox.KeyEsc:
@@ -60,7 +63,7 @@ func runGameLoopOffline(a *arena.Arena) {
 
 	go keyboard.ListenToKeyboard(kChan)
 	a.ChangePlayerTurn(1)
-	a.ChangePlayerTurnAndValidate()
+	a.ChangePlayerTurnAndValidate(DO_RENDER)
 	a.Board.SetCurPawn(0)
 	common.SetRandSeed()
 	a.Dice.Roll()
@@ -106,7 +109,7 @@ func StartGameOffline(players []common.PlayerData) {
 		Bots:           make(map[int][4]int),
 		KChan:          &kChan,
 	}
-	a.Board.SetupBoard(players)
+	a.SetupBoard()
 	a.BotsInit()
 	runGameLoopOffline(&a)
 }

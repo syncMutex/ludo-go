@@ -17,8 +17,10 @@ func (a *Arena) Render() {
 
 func (a *Arena) RenderBottomSection() {
 	x, y := 10, 22
+	pName := a.Players[a.CurTurn].Name
 	renderWhoseTurn(a.Players[a.CurTurn].Color, x, y)
-	tbu.RenderString(x+2, y, "'s turn", termbox.ColorDefault)
+	tbu.RenderString(x+2, y, pName, termbox.ColorDefault)
+	tbu.RenderString(x+2+len(pName), y, "'s turn", termbox.ColorDefault)
 	tbu.RenderString(x+20, y, "Dice: "+strconv.Itoa(a.Dice.Value), termbox.ColorDefault)
 }
 

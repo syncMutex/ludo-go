@@ -5,15 +5,42 @@ import (
 	"ludo/src/game/arena"
 	"ludo/src/keyboard"
 	"ludo/src/network"
+	"ludo/src/network/schema"
 	tbu "ludo/src/termbox-utils"
 	"time"
 
 	"github.com/nsf/termbox-go"
 )
 
-func getBoardState(gh *network.GobHandler) (brdSt common.BoardState) {
-	gh.Decode(&brdSt)
-	return
+const (
+	animDuration = time.Millisecond * 0
+)
+
+func handleKeyboardOnline(a *arena.Arena, k keyboard.KeyboardEvent, gh *network.GobHandler) bool {
+	if a.IsGameOver() {
+		return k.Key == termbox.KeyEsc
+	}
+
+	a.StopBlinkCurPawn()
+	a.RepaintCurPawn()
+	switch k.Key {
+	case termbox.KeyArrowRight:
+		a.SetNextCurPawnAndValidate(1)
+		a.StartBlinkCurPawn()
+	case termbox.KeyArrowLeft:
+		a.SetNextCurPawnAndValidate(-1)
+		a.StartBlinkCurPawn()
+	case termbox.KeyEnter:
+		fallthrough
+	case termbox.KeySpace:
+		gh.SendResponse(schema.MOVE, a.Board.CurPawnIdx)
+		a.MakeMove(animDuration, DO_RENDER)
+		a.Render()
+	case termbox.KeyEsc:
+		return true
+	}
+	a.Render()
+	return false
 }
 
 func onlineGameLoop(
@@ -44,23 +71,33 @@ func onlineGameLoop(
 		select {
 		case instruc := <-nh.NetChan:
 			switch instruc {
-			case common.BOARD_STATE:
-				brdSt := getBoardState(gh)
+			case schema.BOARD_STATE:
+				brdSt := network.DecodeData[schema.BoardState](gh)
 				a.Dice.Value = brdSt.DiceValue
 				a.SetCurPlayerAndPawn(brdSt.CurTurn, 0)
 				curTurnFunc()
 				a.Render()
-			case common.KNOWN_ERR:
+			case schema.MOVE_BY:
+				movedBy := network.DecodeData[schema.MoveBy](gh)
+				a.SetCurPlayerAndPawn(movedBy.Color, movedBy.PawnIdx)
+				a.MakeMove(animDuration, DO_RENDER)
+				a.Render()
+			case schema.KNOWN_ERR:
 				tbu.Clear()
-				tbu.RenderText(tbu.Text{X: 5, Y: 3, Text: gh.GetRes().Msg, Fg: termbox.ColorRed})
+				tbu.RenderText(tbu.Text{X: 5, Y: 3, Text: network.DecodeData[schema.Res](gh).Msg, Fg: termbox.ColorRed})
 				termbox.Flush()
 				time.Sleep(time.Second * 3)
 				return -1
 			}
 			nh.Continue(true)
 		case ev := <-kChan.EvChan:
-			if ev.Key == termbox.KeyEsc {
+			kChan.Pause()
+			if stop := handleKeyboardOnline(a, ev, gh); stop {
+				kChan.Stop()
 				return 0
+			}
+			if ev.Key != termbox.KeySpace && ev.Key != termbox.KeyEnter {
+				kChan.Resume()
 			}
 		}
 	}
@@ -80,7 +117,6 @@ func renderJoinedPlayers(players []common.PlayerData) {
 }
 
 func StartGameOnline() int {
-	var players []common.PlayerData
 	var playerData common.PlayerData
 
 	playerData.Name = tbu.PromptText(3, 3, termbox.ColorDefault, "Your Name: ", 15)
@@ -107,22 +143,21 @@ func StartGameOnline() int {
 		select {
 		case instruc := <-nh.NetChan:
 			switch instruc {
-			case common.CONN_RES:
-				if gh.GetRes().Ok {
+			case schema.CONN_RES:
+				if network.DecodeData[schema.Res](gh).Ok {
 					gh.Encode(playerData.Name)
 				}
-			case common.PLAYER_COLOR:
+			case schema.PLAYER_COLOR:
 				gh.Decode(&playerData.Color)
-			case common.JOINED_PLAYERS:
-				gh.Decode(&players)
+			case schema.JOINED_PLAYERS:
+				players := network.DecodeData[[]common.PlayerData](gh)
 				renderJoinedPlayers(players)
-			case common.START_GAME:
-				var a arena.Arena
-				gh.Decode(&a)
+			case schema.START_GAME:
+				a := network.DecodeData[arena.Arena](gh)
 				return onlineGameLoop(&a, &kChan, gh, nh, playerData)
-			case common.KNOWN_ERR:
+			case schema.KNOWN_ERR:
 				tbu.Clear()
-				tbu.RenderText(tbu.Text{X: 5, Y: 3, Text: gh.GetRes().Msg, Fg: termbox.ColorRed})
+				tbu.RenderText(tbu.Text{X: 5, Y: 3, Text: network.DecodeData[schema.Res](gh).Msg, Fg: termbox.ColorRed})
 				termbox.Flush()
 				time.Sleep(time.Second * 3)
 				return -1

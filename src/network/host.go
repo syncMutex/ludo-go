@@ -4,33 +4,39 @@ import (
 	"ludo/src/common"
 	"ludo/src/game/arena"
 	board "ludo/src/ludo-board"
+	"ludo/src/network/schema"
 	"net"
 	"strconv"
 )
+
+const DONT_RENDER = false
 
 func handleClient(conn net.Conn, server Server) {
 	defer conn.Close()
 	gh := NewGobHandler(conn)
 
-	gh.SendResponse(common.CONN_RES, common.Res{Ok: true, Msg: "Connected Successfully."})
+	gh.SendResponse(schema.CONN_RES, schema.Res{Ok: true, Msg: "Connected Successfully."})
 	playerInfo := server.getNameAndJoinGame(gh)
 	if playerInfo == nil {
-		gh.SendResponse(common.KNOWN_ERR, common.Res{Ok: false, Msg: "Game full."})
+		gh.SendResponse(schema.KNOWN_ERR, schema.Res{Ok: false, Msg: "Game full."})
 		return
 	}
-	gh.SendResponse(common.PLAYER_COLOR, playerInfo.Color)
+	gh.SendResponse(schema.PLAYER_COLOR, playerInfo.Color)
 	server.updateJoinedPlayers()
 
 	if server.isAllReserved() {
-		server.broadcastResponse(common.START_GAME, server.arena)
+		server.broadcastResponse(schema.START_GAME, server.arena)
 		server.setupBoard()
 		brdSt := server.boardState()
-		server.broadcastResponse(common.BOARD_STATE, brdSt)
+		server.broadcastResponse(schema.BOARD_STATE, brdSt)
 	}
 
 	for {
 		instruc, _ := gh.ReceiveInstruc()
 		switch instruc {
+		case schema.MOVE:
+			pawnIdx := DecodeData[int](gh)
+			server.broadcastResponseExcept(schema.MOVE_BY, schema.MoveBy{Color: playerInfo.Color, PawnIdx: pawnIdx}, playerInfo.Color)
 		}
 	}
 }

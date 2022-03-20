@@ -3,7 +3,7 @@ package network
 import (
 	"bufio"
 	"encoding/gob"
-	"ludo/src/common"
+	"ludo/src/network/schema"
 	"net"
 	"sync"
 )
@@ -36,9 +36,14 @@ func (h *GobHandler) ReceiveInstruc() (int, error) {
 	err := h.Decode(&instruc)
 
 	if err != nil {
-		return common.UNKNOWN_ERR, err
+		return schema.UNKNOWN_ERR, err
 	}
 	return instruc, err
+}
+
+func DecodeData[T schema.NetworkSchemas](h *GobHandler) (data T) {
+	h.Decode(&data)
+	return
 }
 
 func (h *GobHandler) SendInstruc(instruc int, data interface{}, wg ...*sync.WaitGroup) error {
@@ -60,11 +65,6 @@ func (h *GobHandler) SendResponse(instruc int, data interface{}, wg ...*sync.Wai
 		return nil
 	}
 	return err
-}
-
-func (h *GobHandler) GetRes() (res common.Res) {
-	h.Decode(&res)
-	return
 }
 
 func NewGobHandler(conn net.Conn) *GobHandler {
