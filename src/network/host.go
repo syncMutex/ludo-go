@@ -23,6 +23,9 @@ func handleClient(conn net.Conn, server Server) {
 
 	if server.isAllReserved() {
 		server.broadcastResponse(common.START_GAME, server.arena)
+		server.setupBoard()
+		brdSt := server.boardState()
+		server.broadcastResponse(common.BOARD_STATE, brdSt)
 	}
 
 	for {
@@ -64,7 +67,9 @@ func Host(players []common.PlayerData) {
 			NextWinningPos: 0,
 			Dice:           gameDice,
 			Bots:           make(map[int][4]int),
-			KChan:          nil,
+			// will be init on client
+			KChan:   nil,
+			BlinkCh: nil,
 		},
 	}
 	listenRequests(server)

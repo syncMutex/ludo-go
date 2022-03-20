@@ -52,3 +52,16 @@ func (s *Server) updateJoinedPlayers() {
 	}
 	s.broadcastResponse(common.JOINED_PLAYERS, joinedPlayers)
 }
+
+func (s *Server) boardState() (brdSt common.BoardState) {
+	brdSt.CurTurn = s.arena.CurPlayer().Color
+	brdSt.DiceValue = s.arena.Dice.Value
+	return
+}
+
+func (s *Server) setupBoard() {
+	s.arena.SetupBoard()
+	s.arena.CurTurn = 1
+	s.arena.ChangePlayerTurnAndValidate()
+	s.arena.Board.SetCurPawn(0)
+}

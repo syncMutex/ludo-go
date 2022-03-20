@@ -11,6 +11,61 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+func getBoardState(gh *network.GobHandler) (brdSt common.BoardState) {
+	gh.Decode(&brdSt)
+	return
+}
+
+func onlineGameLoop(
+	a *arena.Arena,
+	kChan *keyboard.KeyboardProps,
+	gh *network.GobHandler,
+	nh *network.InstrucLoopHandler,
+	playerData common.PlayerData,
+) int {
+
+	nh.Continue(true)
+
+	kChan.Pause()
+
+	a.KChan = kChan
+	a.BlinkCh = make(chan bool)
+
+	a.SetupBoard()
+
+	curTurnFunc := func() {
+		if playerData.Color == a.CurPlayer().Color {
+			a.StartBlinkCurPawn()
+			kChan.Resume()
+		}
+	}
+
+	for {
+		select {
+		case instruc := <-nh.NetChan:
+			switch instruc {
+			case common.BOARD_STATE:
+				brdSt := getBoardState(gh)
+				a.Dice.Value = brdSt.DiceValue
+				a.SetCurPlayerAndPawn(brdSt.CurTurn, 0)
+				curTurnFunc()
+				a.Render()
+			case common.KNOWN_ERR:
+				tbu.Clear()
+				tbu.RenderText(tbu.Text{X: 5, Y: 3, Text: gh.GetRes().Msg, Fg: termbox.ColorRed})
+				termbox.Flush()
+				time.Sleep(time.Second * 3)
+				return -1
+			}
+			nh.Continue(true)
+		case ev := <-kChan.EvChan:
+			if ev.Key == termbox.KeyEsc {
+				return 0
+			}
+		}
+	}
+}
+
 func renderJoinedPlayers(players []common.PlayerData) {
 	tbu.Clear()
 	x, y := 2, 5
@@ -44,6 +99,7 @@ func StartGameOnline() int {
 	go keyboard.ListenToKeyboard(&kChan)
 
 	defer func() {
+		kChan.Stop()
 		gh.Conn.Close()
 	}()
 
@@ -63,8 +119,7 @@ func StartGameOnline() int {
 			case common.START_GAME:
 				var a arena.Arena
 				gh.Decode(&a)
-				a.SetupBoard()
-				a.Render()
+				return onlineGameLoop(&a, &kChan, gh, nh, playerData)
 			case common.KNOWN_ERR:
 				tbu.Clear()
 				tbu.RenderText(tbu.Text{X: 5, Y: 3, Text: gh.GetRes().Msg, Fg: termbox.ColorRed})
@@ -75,8 +130,6 @@ func StartGameOnline() int {
 			nh.Continue(true)
 		case ev := <-kChan.EvChan:
 			if ev.Key == termbox.KeyEsc {
-				nh.Continue(false)
-				kChan.Stop()
 				return 0
 			}
 		}
