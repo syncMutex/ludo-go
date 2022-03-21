@@ -11,7 +11,7 @@ import (
 
 const DONT_RENDER = false
 
-func handleClient(conn net.Conn, server Server) {
+func handleClient(conn net.Conn, server *Server) {
 	defer conn.Close()
 	gh := NewGobHandler(conn)
 
@@ -27,21 +27,19 @@ func handleClient(conn net.Conn, server Server) {
 	if server.isAllReserved() {
 		server.broadcastResponse(schema.START_GAME, server.arena)
 		server.setupBoard()
-		brdSt := server.boardState()
-		server.broadcastResponse(schema.BOARD_STATE, brdSt)
+		server.broadcastResponse(schema.BOARD_STATE, server.boardState())
 	}
 
 	for {
 		instruc, _ := gh.ReceiveInstruc()
 		switch instruc {
 		case schema.MOVE:
-			pawnIdx := DecodeData[int](gh)
-			server.broadcastResponseExcept(schema.MOVE_BY, schema.MoveBy{Color: playerInfo.Color, PawnIdx: pawnIdx}, playerInfo.Color)
+			server.onMove(DecodeData[int](gh), playerInfo.PlayerData)
 		}
 	}
 }
 
-func listenRequests(server Server) {
+func listenRequests(server *Server) {
 	ln, _ := net.Listen("tcp", ":8080")
 	for {
 		conn, _ := ln.Accept()
@@ -78,5 +76,5 @@ func Host(players []common.PlayerData) {
 			BlinkCh: nil,
 		},
 	}
-	listenRequests(server)
+	listenRequests(&server)
 }

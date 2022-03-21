@@ -75,8 +75,8 @@ func onlineGameLoop(
 				brdSt := network.DecodeData[schema.BoardState](gh)
 				a.Dice.Value = brdSt.DiceValue
 				a.SetCurPlayerAndPawn(brdSt.CurTurn, 0)
-				curTurnFunc()
 				a.Render()
+				curTurnFunc()
 			case schema.MOVE_BY:
 				movedBy := network.DecodeData[schema.MoveBy](gh)
 				a.SetCurPlayerAndPawn(movedBy.Color, movedBy.PawnIdx)

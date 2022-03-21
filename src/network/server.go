@@ -4,6 +4,7 @@ import (
 	"ludo/src/common"
 	"ludo/src/game/arena"
 	"ludo/src/network/schema"
+	"time"
 )
 
 type Player struct {
@@ -31,11 +32,15 @@ func (s *Server) getNameAndJoinGame(gh *GobHandler) *Player {
 	playerName := DecodeData[string](gh)
 
 	for i := range s.players {
-		p := &s.players[i]
+		p := &(s.players[i])
 		if !p.isReserved && p.Type == "Player" {
 			p.gh = gh
 			p.Name = playerName
 			p.isReserved = true
+			a := &(s.arena)
+			a.Players[i].Type = p.Type
+			a.Players[i].Color = p.Color
+			a.Players[i].Name = p.Name
 			return p
 		}
 	}
@@ -60,8 +65,34 @@ func (s *Server) boardState() (brdSt schema.BoardState) {
 }
 
 func (s *Server) setupBoard() {
-	s.arena.SetupBoard()
-	s.arena.CurTurn = 1
-	s.arena.ChangePlayerTurnAndValidate(DONT_RENDER)
-	s.arena.Board.SetCurPawn(0)
+	a := &(s.arena)
+	a.SetupBoard()
+	a.CurTurn = 1
+	a.ChangePlayerTurnAndValidate(DONT_RENDER)
+	a.Board.SetCurPawn(0)
+}
+
+func (s *Server) onMove(pawnIdx int, playerInfo common.PlayerData) {
+	a := &(s.arena)
+	a.SetCurPlayerAndPawn(playerInfo.Color, pawnIdx)
+
+	hasDestroyed, hasReachedDest := a.MakeMove(time.Millisecond*0, DONT_RENDER)
+	s.broadcastResponseExcept(schema.MOVE_BY, schema.MoveBy{Color: playerInfo.Color, PawnIdx: pawnIdx}, playerInfo.Color)
+	a.Dice.Roll()
+
+	if !hasDestroyed && !hasReachedDest {
+		a.ChangePlayerTurnAndValidate(DONT_RENDER)
+	} else if hasReachedDest {
+		if a.CurPlayer().IsAllPawnsAtDest() {
+			a.SetCurPlayerWin()
+			if a.IsGameOver() {
+				a.ChangePlayerTurn()
+				a.SetCurPlayerWin()
+			}
+		}
+		if ok := a.SetNextCurPawnAndValidate(1); !ok {
+			a.ChangePlayerTurnAndValidate(DONT_RENDER)
+		}
+	}
+	s.broadcastResponse(schema.BOARD_STATE, s.boardState())
 }
