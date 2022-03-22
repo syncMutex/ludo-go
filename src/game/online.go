@@ -25,11 +25,11 @@ func handleKeyboardOnline(a *arena.Arena, k keyboard.KeyboardEvent, gh *network.
 	a.RepaintCurPawn()
 	switch k.Key {
 	case termbox.KeyArrowRight:
+		a.StartBlinkCurPawn()
 		a.SetNextCurPawnAndValidate(1)
-		a.StartBlinkCurPawn()
 	case termbox.KeyArrowLeft:
-		a.SetNextCurPawnAndValidate(-1)
 		a.StartBlinkCurPawn()
+		a.SetNextCurPawnAndValidate(-1)
 	case termbox.KeyEnter:
 		fallthrough
 	case termbox.KeySpace:
@@ -63,6 +63,8 @@ func onlineGameLoop(
 	curTurnFunc := func() {
 		if playerData.Color == a.CurPlayer().Color {
 			a.StartBlinkCurPawn()
+			a.Board.SetCurPawn(3)
+			a.SetNextCurPawnAndValidate(1)
 			kChan.Resume()
 		}
 	}
@@ -77,6 +79,11 @@ func onlineGameLoop(
 				a.SetCurPlayerAndPawn(brdSt.CurTurn, 0)
 				a.Render()
 				curTurnFunc()
+			case schema.LOOPED:
+				brdSt := network.DecodeData[schema.BoardState](gh)
+				a.Dice.Value = brdSt.DiceValue
+				a.SetCurPlayerAndPawn(brdSt.CurTurn, 0)
+				a.Render()
 			case schema.MOVE_BY:
 				movedBy := network.DecodeData[schema.MoveBy](gh)
 				a.SetCurPlayerAndPawn(movedBy.Color, movedBy.PawnIdx)
@@ -88,12 +95,23 @@ func onlineGameLoop(
 				termbox.Flush()
 				time.Sleep(time.Second * 3)
 				return -1
+			case schema.GAME_OVER:
+				lb := network.DecodeData[[]termbox.Attribute](gh)
+				a.RenderGameOver(lb)
+				kChan.Resume()
+				for {
+					ev := <-kChan.EvChan
+					kChan.Pause()
+					if ev.Key == termbox.KeyEsc {
+						return 0
+					}
+					kChan.Resume()
+				}
 			}
 			nh.Continue(true)
 		case ev := <-kChan.EvChan:
 			kChan.Pause()
 			if stop := handleKeyboardOnline(a, ev, gh); stop {
-				kChan.Stop()
 				return 0
 			}
 			if ev.Key != termbox.KeySpace && ev.Key != termbox.KeyEnter {

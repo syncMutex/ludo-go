@@ -31,19 +31,19 @@ func handleKeyboardOffline(a *arena.Arena, k keyboard.KeyboardEvent) bool {
 		a.Dice.Roll()
 		a.Render()
 		if !hasDestroyed && !hasReachedDest {
-			a.ChangePlayerTurnAndValidate(DO_RENDER)
+			a.ChangePlayerTurnAndValidate(DO_RENDER, nil)
 		} else if hasReachedDest {
 			if a.CurPlayer().IsAllPawnsAtDest() {
 				a.SetCurPlayerWin()
 				if a.IsGameOver() {
 					a.ChangePlayerTurn()
 					a.SetCurPlayerWin()
-					a.RenderGameOver()
+					a.RenderGameOver(a.LeaderBoard())
 					return false
 				}
 			}
 			if ok := a.SetNextCurPawnAndValidate(1); !ok {
-				a.ChangePlayerTurnAndValidate(DO_RENDER)
+				a.ChangePlayerTurnAndValidate(DO_RENDER, nil)
 			}
 		}
 	case termbox.KeyEsc:
@@ -63,7 +63,7 @@ func runGameLoopOffline(a *arena.Arena) {
 
 	go keyboard.ListenToKeyboard(kChan)
 	a.ChangePlayerTurn(1)
-	a.ChangePlayerTurnAndValidate(DO_RENDER)
+	a.ChangePlayerTurnAndValidate(DO_RENDER, nil)
 	a.Board.SetCurPawn(0)
 	common.SetRandSeed()
 	a.Dice.Roll()

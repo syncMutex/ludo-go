@@ -96,7 +96,7 @@ func (a *Arena) SetCurPlayerWin() {
 	a.NextWinningPos++
 }
 
-func (a *Arena) ChangePlayerTurnAndValidate(doRender bool) {
+func (a *Arena) ChangePlayerTurnAndValidate(doRender bool, onLoop func()) {
 	ok := a.ChangePlayerTurn()
 	if doRender {
 		a.Render()
@@ -104,6 +104,9 @@ func (a *Arena) ChangePlayerTurnAndValidate(doRender bool) {
 	for !ok {
 		if doRender {
 			a.Render()
+		}
+		if onLoop != nil {
+			onLoop()
 		}
 		time.Sleep(time.Millisecond * 1500)
 		a.Dice.Roll()

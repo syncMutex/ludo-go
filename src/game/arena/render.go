@@ -28,23 +28,37 @@ func renderWhoseTurn(bg termbox.Attribute, x, y int) {
 	tbu.SetCell(x, y, ' ', termbox.ColorDefault, bg)
 }
 
-func (a *Arena) RenderGameOver() {
-	tbu.Clear()
-	leaderBoard := make([]termbox.Attribute, a.ParticipantsCount)
+func (a *Arena) LeaderBoard() []termbox.Attribute {
+	lb := make([]termbox.Attribute, a.ParticipantsCount)
 	for _, p := range a.Board.Players {
 		if p.IsParticipant() {
-			leaderBoard[p.WinningPos-1] = p.Color
+			lb[p.WinningPos-1] = p.Color
 		}
 	}
+	return lb
+}
+
+func (a *Arena) getPlayerName(color termbox.Attribute) string {
+	for _, p := range a.Players {
+		if p.Color == color {
+			return p.Name
+		}
+	}
+	return ""
+}
+
+func (a *Arena) RenderGameOver(lb []termbox.Attribute) {
+	tbu.Clear()
 
 	x, y := 5, 5
 
 	tbu.RenderString(x+5, y-3, "Game Over!", termbox.ColorGreen)
 
-	for i, p := range leaderBoard {
+	for i, p := range lb {
 		x = 5
 		tbu.RenderString(x, y, strconv.Itoa(i+1), termbox.ColorDefault)
 		tbu.SetBg(x+3, y, p)
+		tbu.RenderString(x+6, y, a.getPlayerName(p), termbox.ColorDefault)
 		y += 2
 	}
 

@@ -27,13 +27,16 @@ func handleClient(conn net.Conn, server *Server) {
 	if server.isAllReserved() {
 		server.broadcastResponse(schema.START_GAME, server.arena)
 		server.setupBoard()
-		server.broadcastResponse(schema.BOARD_STATE, server.boardState())
+		server.broadcastBoardState()
 	}
 
 	for {
 		instruc, _ := gh.ReceiveInstruc()
 		switch instruc {
 		case schema.MOVE:
+			if playerInfo.Color != server.boardState().CurTurn {
+				continue
+			}
 			server.onMove(DecodeData[int](gh), playerInfo.PlayerData)
 		}
 	}

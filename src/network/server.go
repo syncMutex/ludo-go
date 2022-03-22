@@ -68,8 +68,16 @@ func (s *Server) setupBoard() {
 	a := &(s.arena)
 	a.SetupBoard()
 	a.CurTurn = 1
-	a.ChangePlayerTurnAndValidate(DONT_RENDER)
+	a.ChangePlayerTurnAndValidate(DONT_RENDER, nil)
 	a.Board.SetCurPawn(0)
+}
+
+func (s *Server) broadcastBoardState() {
+	s.broadcastResponse(schema.BOARD_STATE, s.boardState())
+}
+
+func (s *Server) broadcastLoop() {
+	s.broadcastResponse(schema.LOOPED, s.boardState())
 }
 
 func (s *Server) onMove(pawnIdx int, playerInfo common.PlayerData) {
@@ -81,18 +89,19 @@ func (s *Server) onMove(pawnIdx int, playerInfo common.PlayerData) {
 	a.Dice.Roll()
 
 	if !hasDestroyed && !hasReachedDest {
-		a.ChangePlayerTurnAndValidate(DONT_RENDER)
+		a.ChangePlayerTurnAndValidate(DONT_RENDER, s.broadcastLoop)
 	} else if hasReachedDest {
 		if a.CurPlayer().IsAllPawnsAtDest() {
 			a.SetCurPlayerWin()
 			if a.IsGameOver() {
 				a.ChangePlayerTurn()
 				a.SetCurPlayerWin()
+				s.broadcastResponse(schema.GAME_OVER, s.arena.LeaderBoard())
 			}
 		}
 		if ok := a.SetNextCurPawnAndValidate(1); !ok {
-			a.ChangePlayerTurnAndValidate(DONT_RENDER)
+			a.ChangePlayerTurnAndValidate(DONT_RENDER, nil)
 		}
 	}
-	s.broadcastResponse(schema.BOARD_STATE, s.boardState())
+	s.broadcastBoardState()
 }

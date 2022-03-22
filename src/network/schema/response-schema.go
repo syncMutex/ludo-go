@@ -14,10 +14,12 @@ const (
 	JOINED_PLAYERS
 	PLAYER_COLOR
 	START_GAME
+	GAME_OVER
 
 	BOARD_STATE
 	MOVE
 	MOVE_BY
+	LOOPED
 )
 
 type Res struct {
@@ -36,5 +38,5 @@ type MoveBy struct {
 }
 
 type NetworkSchemas interface {
-	Res | BoardState | MoveBy | int | string | []common.PlayerData | arena.Arena
+	Res | BoardState | MoveBy | int | string | []common.PlayerData | arena.Arena | []termbox.Attribute
 }
