@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"ludo/src/common"
 	"ludo/src/game/arena"
 	"ludo/src/keyboard"
@@ -134,14 +135,30 @@ func renderJoinedPlayers(players []common.PlayerData) {
 	termbox.Flush()
 }
 
-func StartGameOnline() int {
+func renderErr(errText string) {
+	tbu.Clear()
+	tbu.RenderText(tbu.Text{X: 5, Y: 3, Text: errText, Fg: termbox.ColorRed})
+	termbox.Flush()
+	time.Sleep(time.Second * 3)
+}
+
+func StartGameOnline(url string) int {
 	var playerData common.PlayerData
 
 	playerData.Name = tbu.PromptText(3, 3, termbox.ColorDefault, "Your Name: ", 15)
 
-	gh, err := network.Join()
+	if url == "" {
+		tbu.Clear()
+		termbox.Close()
+		fmt.Print("paste the game url: ")
+		fmt.Scanln(&url)
+		termbox.Init()
+	}
+
+	gh, err := network.Join(url)
 
 	if err != nil {
+		renderErr("unable to connect. Maybe check the url.")
 		termbox.Close()
 		return -1
 	}
@@ -174,10 +191,7 @@ func StartGameOnline() int {
 				a := network.DecodeData[arena.Arena](gh)
 				return onlineGameLoop(&a, &kChan, gh, nh, playerData)
 			case schema.KNOWN_ERR:
-				tbu.Clear()
-				tbu.RenderText(tbu.Text{X: 5, Y: 3, Text: network.DecodeData[schema.Res](gh).Msg, Fg: termbox.ColorRed})
-				termbox.Flush()
-				time.Sleep(time.Second * 3)
+				renderErr(network.DecodeData[schema.Res](gh).Msg)
 				return -1
 			}
 			nh.Continue(true)

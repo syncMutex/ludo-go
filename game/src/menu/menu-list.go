@@ -71,7 +71,7 @@ var (
 				label: "Join",
 				onSelect: func(mpt *menuPagesType) (bool, callback) {
 					return true, func() int {
-						return game.StartGameOnline()
+						return game.StartGameOnline("")
 					}
 				},
 			},
@@ -118,7 +118,7 @@ var (
 						termbox.Close()
 						termbox.Init()
 						go network.Host(players)
-						return game.StartGameOnline()
+						return game.StartGameOnline("127.0.0.1:8080")
 					}
 				},
 			},
