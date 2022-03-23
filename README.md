@@ -6,7 +6,7 @@ Installation:
 
 1. You need to have python and golang installed on your device.
 2. In your terminal go to the root directory of the game file.
-3. Run "bash setup.sh" and let the installation process complete
+3. Run "bash setup.sh" and let the installation process complete. You can stop server install by running "bash setup.sh -noserver".
 4. After that a executable file will be generated in the root directory as "ludo" in linux/mac or "ludo.exe" on windows.
 
 ### For Online
