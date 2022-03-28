@@ -71,12 +71,15 @@ func runGameLoopOffline(a *arena.Arena) {
 	a.Render()
 	a.StartBlinkCurPawn()
 
-	for a.CurPlayer().IsBot() {
-		a.PlayBot(botFuncOffline)
-		if a.IsGameOver() {
-			break
+	botChecker := func() {
+		for a.CurPlayer().IsBot() {
+			a.PlayBot(botFuncOffline)
+			if a.IsGameOver() {
+				break
+			}
 		}
 	}
+	botChecker()
 mainloop:
 	for {
 		ev := <-kChan.EvChan
@@ -85,12 +88,7 @@ mainloop:
 			kChan.Stop()
 			break mainloop
 		}
-		for a.CurPlayer().IsBot() {
-			a.PlayBot(botFuncOffline)
-			if a.IsGameOver() {
-				break
-			}
-		}
+		botChecker()
 		kChan.Resume()
 	}
 }

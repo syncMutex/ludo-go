@@ -1,7 +1,6 @@
 package network
 
 import (
-	"bufio"
 	"encoding/gob"
 	"ludo/src/network/schema"
 	"net"
@@ -9,10 +8,9 @@ import (
 )
 
 type GobHandler struct {
-	enc    *gob.Encoder
-	dec    *gob.Decoder
-	reader *bufio.Reader
-	Conn   net.Conn
+	enc  *gob.Encoder
+	dec  *gob.Decoder
+	Conn net.Conn
 }
 
 type InstrucLoopHandler struct {
@@ -68,7 +66,7 @@ func (h *GobHandler) SendResponse(instruc int, data interface{}, wg ...*sync.Wai
 }
 
 func NewGobHandler(conn net.Conn) *GobHandler {
-	return &GobHandler{gob.NewEncoder(conn), gob.NewDecoder(conn), bufio.NewReader(conn), conn}
+	return &GobHandler{gob.NewEncoder(conn), gob.NewDecoder(conn), conn}
 }
 
 func NewInstrucLoopHandler(receiverFunc func() (int, error)) *InstrucLoopHandler {
